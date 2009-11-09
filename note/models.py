@@ -10,6 +10,7 @@ class Group(models.Model):
         return self.name
 
 class MyUser(User):
+    #nick = models.CharField(max_length=100)
     belong = models.ManyToManyField(Group)
     objects = auth_models.UserManager()
 

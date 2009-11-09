@@ -14,4 +14,8 @@ urlpatterns = patterns('',
 
     # Uncomment the next line to enable the admin:
     # (r'^admin/', include(admin.site.urls)),
+    (r'^note/$','graduate.note.views.index'),
+    #(r'^note/user/$','graduate.note.views.users'),
+    #(r'^note/user/(?<user_id>\d+)/$','graduate.note.views.user'),
+    #(r'^note/user/(?<user_id>\d+)/(?<note_id>\d+)/$','graduate.note.views.note'),
 )
