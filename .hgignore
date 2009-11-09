@@ -1,0 +1,4 @@
+syntax: glob
+*.pyc
+note/*.pyc
+.DS_STORE
