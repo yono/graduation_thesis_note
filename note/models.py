@@ -11,6 +11,7 @@ class Group(models.Model):
 
 class MyUser(User):
     belong = models.ManyToManyField(Group)
+    objects = auth_models.UserManager()
 
     def __unicode__(self):
         return self.username
