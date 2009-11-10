@@ -20,3 +20,13 @@ def user(request,user_nick):
         'notes':notes
         })
     return HttpResponse(t.render(c))
+
+def note(request,user_nick,note_id):
+    user = MyUser.objects.get(nick=user_nick)
+    note = Note.objects.get(user=user.id)
+    t = loader.get_template('note/note.html')
+    c = Context({
+        'user':user,
+        'note':note
+        })
+    return HttpResponse(t.render(c))
