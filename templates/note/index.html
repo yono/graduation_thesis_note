@@ -1,0 +1,9 @@
+{% if user_list %}
+<ul>
+    {% for user in user_list %}
+    <li><a href="{{user.nick}}">{{ user.username }}</a></li>
+    {% endfor %}
+</ul>
+{% else %}
+<p> No users are avaliable. </p>
+{% endif %}

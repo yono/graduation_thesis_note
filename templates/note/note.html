@@ -1,0 +1,22 @@
+<h1>詳細表示</h1>
+{% if note %}
+<p>{{user.username}}</p>
+<table border="1" cellspacing="0" width="750px">
+    <tr>
+        <td width="100px"><nobr>日付</nobr></td>
+        <td>{{note.date}}</td>
+    </tr>
+    <tr>
+        <td><nobr>場所</nobr></td>
+        <td>{{note.locate}}</td>
+    </tr>
+    <tr>
+        <td><nobr>タイトル</nobr></td>
+        <td>{{note.title}}</td>
+    </tr>
+    <tr>
+        <td><nobr>内容</nobr></td>
+        <td>{{note.content}}</td>
+    </tr>
+</table>
+{% endif %}

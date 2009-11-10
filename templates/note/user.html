@@ -1,0 +1,18 @@
+<h1>{{user.nick}}</h1>
+{% if notes %}
+<table border="1" cellspacing="0">
+    <tr>
+        <th>日付</th><th>タイトル</th><th>時刻</th><th>場所</th>
+    </tr>
+    {% for note in notes %}
+    <tr>
+        <td>{{note.date}}</td>
+        <td><a href="{{note.id}}">{{note.title}}</a></td>
+        <td>{{note.date}}</td>
+        <td>{{note.locate}}</td>
+    </tr>
+    {% endfor %}
+</table>
+{% else %}
+<p> No notes are avaliable. </p>
+{% endif %}
