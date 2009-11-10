@@ -1,3 +1,5 @@
+{% extends "note/base.html" %}
+{% block content %}
 <h1>{{user.nick}}</h1>
 {% if notes %}
 <table border="1" cellspacing="0">
@@ -16,3 +18,4 @@
 {% else %}
 <p> No notes are avaliable. </p>
 {% endif %}
+{% endblock content %}

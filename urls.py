@@ -17,4 +17,5 @@ urlpatterns = patterns('',
     (r'^note/$','graduate.note.views.index'),
     (r'^note/(?P<user_nick>\w+)/$','graduate.note.views.user'),
     (r'^note/(?P<user_nick>\w+)/(?P<note_id>\d+)/$','graduate.note.views.note'),
+    (r'^site_media/(?P<path>.+)$','django.views.static.serve',{'document_root':'/Users/yono/hg/django/graduate/templates'}),
 )

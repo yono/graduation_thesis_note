@@ -1,3 +1,6 @@
+{% extends "note/base.html" %}
+
+{% block content %}
 {% if user_list %}
 <ul>
     {% for user in user_list %}
@@ -7,3 +10,4 @@
 {% else %}
 <p> No users are avaliable. </p>
 {% endif %}
+{% endblock content %}
