@@ -1,6 +1,6 @@
 {% extends "note/base.html" %}
 {% block content %}
-<h1>{{user.nick}}</h1>
+<h1>{{user.nick}} のノート一覧</h1>
 {% if notes %}
 <table border="1" cellspacing="0">
     <tr>
@@ -18,4 +18,5 @@
 {% else %}
 <p> No notes are avaliable. </p>
 {% endif %}
+<p><a href="note_form">新規作成</a></p>
 {% endblock content %}

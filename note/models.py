@@ -26,3 +26,8 @@ class Note(models.Model):
 
     def __unicode__(self):
         return self.title
+
+from django.contrib import admin
+admin.site.register(MyUser)
+admin.site.register(Note)
+admin.site.register(Group)
