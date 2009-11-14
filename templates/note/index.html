@@ -13,12 +13,13 @@ Index
         <td>
         <ul>
             {% for belong in belongs %}
-            {% if belong.myuser %}
+            {% if belong.user %}
                 {% if belong.end %}
                 <li><a
-                    href='/note/user/{{belong.myuser.nick}}/{{belong.start.year}}'/>{{belong.myuser.username}}</a></li>
+                    href='/note/user/{{belong.user.username}}/{{belong.start.year}}'/>{{belong.user.fullname}}</a></li>
                 {% else %}
-                <li><a href='/note/user/{{belong.myuser.nick}}'/>{{belong.myuser.username}}</a></li>
+                <li><a
+                    href='/note/user/{{belong.user.username}}'/>{{belong.user.fullname}}</a></li>
                 {% endif %}
             {% else %}
                 {{belong}}

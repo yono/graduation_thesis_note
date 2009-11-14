@@ -2,7 +2,7 @@
 # -*- coding:utf-8 -*-
 from django.contrib.auth import authenticate, login
 from django.template import Context, loader
-from graduate.note.models import MyUser,Note, Belong
+from graduate.note.models import MyUser,Note, Belong,Tag
 from django.http import HttpResponse
 from datetime import datetime,time,timedelta
 from math import fabs
@@ -11,21 +11,26 @@ def index(request):
     user_list = MyUser.objects.all()
     years = {}
     groups = {}
+
+    ## 年度と所属の一覧を集める
     for user in user_list:
         belongs = user.belong_set.all()
         for belong in belongs:
             years[belong.start.year] = 0
             groups[belong.group.name] = 0
+
     year_list = []
     for year in years:
         year_list.append(year)
     year_list.sort(reverse=True)
-    belong_list = []
+
     user_table = []
+    belong_list = []
     belong_list.insert(0, [''])
     for group in groups:
         belong_list.append([group])
     user_table.append(belong_list)
+
     for year in year_list:
         oneyear_list = Belong.objects.filter(start__year=year)
         oneyear_users = []
@@ -51,9 +56,9 @@ def index(request):
     return HttpResponse(t.render(c))
 
 def mylogin(request):
-    if 'login_nick' in request.POST and 'login_password' in request.POST:
-        username = request.POST['login_nick']
-        password = request.POST['login_password']
+    if 'username' in request.POST and 'password' in request.POST:
+        username = request.POST['username']
+        password = request.POST['password']
         user = authenticate(username=username,password=password)
         if user is not None:
             if user.is_active:
@@ -69,7 +74,7 @@ def mylogin(request):
     return HttpResponse(t.render(c))
 
 def user(request,user_nick):
-    user = MyUser.objects.get(nick=user_nick)
+    user = MyUser.objects.get(username=user_nick)
     notes = Note.objects.filter(user=user.id)
     t = loader.get_template('note/user.html')
     c = Context({
@@ -79,7 +84,7 @@ def user(request,user_nick):
     return HttpResponse(t.render(c))
 
 def user_year(request,user_nick,year):
-    user = MyUser.objects.get(nick=user_nick)
+    user = MyUser.objects.get(username=user_nick)
     notes = Note.objects.filter(date__year=year)
     t = loader.get_template('note/user.html')
     c = Context({
@@ -89,7 +94,7 @@ def user_year(request,user_nick,year):
     return HttpResponse(t.render(c))
 
 def user_month(request,user_nick,year,month):
-    user = MyUser.objects.get(nick=user_nick)
+    user = MyUser.objects.get(username=user_nick)
     notes = Note.objects.filter(date__year=year,date__month=month)
     t = loader.get_template('note/user.html')
     c = Context({
@@ -141,16 +146,28 @@ def note_create(request):
         end = datetime(end_y,end_m,end_d,end_h,end_mi)
         elapsed_time = end - start
         elapsed_min = (elapsed_time.seconds)/60
-        print end, start
-        print type(elapsed_min),elapsed_min
         note = Note(title=title,content=content,locate=locate,date=date,
                 start=start,end=end,elapsed_time=elapsed_min,user_id=user_id)
         note.save()
+
+        if request.POST['note_tag_list'] != '':
+            tags = request.POST['note_tag_list'].split(',')
+            for tag in tags:
+                tag_list = Tag.objects.filter(name=tag)
+                tag_obj = None
+                if len(tag_list) == 0:
+                    tag_obj = Tag(name=tag)
+                    tag_obj.save()
+                else:
+                    tag_obj = tag_list[0]
+                note.tag.add(tag_obj) 
+            note.save()
+
         return index(request)
 
 def note(request,user_nick,note_id,year,month):
-    user = MyUser.objects.get(nick=user_nick)
-    note = Note.objects.get(user=user.id)
+    user = MyUser.objects.get(username=user_nick)
+    note = Note.objects.get(pk=note_id)
     t = loader.get_template('note/note.html')
     c = Context({
         'user':user,
