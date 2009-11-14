@@ -32,13 +32,6 @@ class Tag(models.Model):
     def __unicode__(self):
         return self.name
 
-class Comment(models.Model):
-    name = models.CharField(max_length=200)
-    content = models.TextField()
-
-    def __unicode__(self):
-        return self.name
-
 class Note(models.Model):
     title = models.CharField(max_length=200)
     content = models.TextField()
@@ -49,11 +42,17 @@ class Note(models.Model):
     elapsed_time = models.IntegerField()
     user = models.ForeignKey(MyUser)
     tag = models.ManyToManyField(Tag)
-    comment = models.ForeignKey(Comment)
 
     def __unicode__(self):
         return self.title
 
+class Comment(models.Model):
+    name = models.CharField(max_length=200)
+    content = models.TextField()
+    note = models.ForeignKey(Note)
+
+    def __unicode__(self):
+        return self.name
 
 from django.contrib import admin
 admin.site.register(MyUser)

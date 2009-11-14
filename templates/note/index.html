@@ -9,11 +9,20 @@ Index
 <table border="1">
     {% for year_list in user_table %}
     <tr>
-        {% for users in year_list %}
+        {% for belongs in year_list %}
         <td>
         <ul>
-            {% for user in users %}
-            <li><a href='/note/{{user.nick}}'/>{{user.username}}</a></li>
+            {% for belong in belongs %}
+            {% if belong.myuser %}
+                {% if belong.end %}
+                <li><a
+                    href='/note/user/{{belong.myuser.nick}}/{{belong.start.year}}'/>{{belong.myuser.username}}</a></li>
+                {% else %}
+                <li><a href='/note/user/{{belong.myuser.nick}}'/>{{belong.myuser.username}}</a></li>
+                {% endif %}
+            {% else %}
+                {{belong}}
+            {% endif %}
             {% endfor %}
         </ul>
         </td>

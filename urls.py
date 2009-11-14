@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from django.conf.urls.defaults import *
 
 # Uncomment the next two lines to enable the admin:
@@ -15,8 +16,21 @@ urlpatterns = patterns('',
     # Uncomment the next line to enable the admin:
     (r'^admin/', include(admin.site.urls)),
     (r'^note/$','graduate.note.views.index'),
-    (r'^note/(?P<user_nick>\w+)/$','graduate.note.views.user'),
-    (r'^note/(?P<user_nick>\w+)/(?P<note_id>\d+)/$','graduate.note.views.note'),
-    (r'^note/(?P<user_nick>\w+)/note_form/$','graduate.note.views.note_form'),
+    # ユーザのノート一覧
+    (r'^note/user/(?P<user_nick>\w+)/$','graduate.note.views.user'),
+    # ユーザの年度別のノート一覧
+    (r'^note/user/(?P<user_nick>\w+)/(?P<year>\d+)/$','graduate.note.views.user_year'),
+    # ユーザの月ごとのノート一覧
+    (r'^note/user/(?P<user_nick>\w+)/(?P<year>\d+)/(?P<month>\d+)/$','graduate.note.views.user_month'),
+    # ユーザのノート詳細
+    (r'^note/user/(?P<user_nick>\w+)/(?P<year>\d+)/(?P<month>\d+)/(?P<note_id>\d+)/$','graduate.note.views.note'),
+
+    # ノート作成
+    (r'^note/note_new/$','graduate.note.views.note_new'),
+    (r'^note/note_create/$','graduate.note.views.note_create'),
+
+    (r'^note/auth/login/$','graduate.note.views.mylogin'),
+
+    # CSS
     (r'^site_media/(?P<path>.+)$','django.views.static.serve',{'document_root':'/Users/yono/hg/django/graduate/templates'}),
 )

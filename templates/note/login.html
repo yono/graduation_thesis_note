@@ -1,0 +1,26 @@
+{% extends 'note/base.html' %}
+{% block title %} 
+Login
+{% endblock title %}
+{% block content %}
+<h1>Login</h1>
+<form action"/note/auth/login" method="post">
+<table>
+    <tr>
+        <td>名前:</td>
+        <td><input id="login_nick" name="login_nick" size="30" type="text"
+            value="" /></td>
+    </tr>
+    <tr>
+        <td>パスワード:</td>
+        <td><input id="login_password" name="login_password" size="30"
+            type="password" /></td>
+    </tr>
+    <tr>
+        <td colspan="2">
+            <input type="submit" value="ログイン" />
+        </td>
+    </tr>
+</table>
+</form>
+{% endblock content %}

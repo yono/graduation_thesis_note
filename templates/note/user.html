@@ -12,7 +12,7 @@
     {% for note in notes %}
     <tr>
         <td>{{note.date}}</td>
-        <td><a href="{{note.id}}">{{note.title}}</a></td>
+        <td><a href="{{note.date.month}}/{{note.id}}">{{note.title}}</a></td>
         <td>{{note.date}}</td>
         <td>{{note.locate}}</td>
     </tr>
@@ -21,5 +21,5 @@
 {% else %}
 <p> No notes are avaliable. </p>
 {% endif %}
-<p><a href="note_form">新規作成</a></p>
+<p><a href="/note/note_new?user={{user.id}}">新規作成</a></p>
 {% endblock content %}
