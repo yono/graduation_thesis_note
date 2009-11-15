@@ -7,6 +7,37 @@ from django.http import HttpResponse
 from datetime import datetime,time,timedelta
 from math import fabs
 
+class TagCloud(object):
+    def __init__(self,tag,cssclass):
+        self.tag = tag
+        self.cssclass = cssclass
+
+def make_tagcloud(notes):
+    css_classes = ['nube1','nube2','nube3','nube4','nube5']
+    tags = {}
+    for note in notes:
+        for tag in note.tag.all():
+            tags[tag.name] = tags.get(tag.name, 0) + 1
+
+    fontmax = -1000
+    fontmin = 1000
+    for tag_num in tags.values():
+        fontmax = max(fontmax, tag_num)
+        fontmin = min(fontmin, tag_num)
+    
+    divisor = ((fontmax-fontmin) / len(css_classes)) + 1
+
+    result = []
+    for tag,num in tags.items():
+        result.append(TagCloud(tag,css_classes[(num-fontmin)/divisor]))
+    return result
+
+class UserTableCell(object):
+    def __init__(self,category,content,users=[]):
+        self.category = category
+        self.content = content
+        self.users = users
+
 def index(request):
     user_list = MyUser.objects.all()
     years = {}
@@ -25,26 +56,27 @@ def index(request):
     year_list.sort(reverse=True)
 
     user_table = []
-    belong_list = []
-    belong_list.insert(0, [''])
+    belong_list = [UserTableCell('belong','')]
     for group in groups:
-        belong_list.append([group])
+        belong_list.append(UserTableCell('belong',group))
     user_table.append(belong_list)
 
     for year in year_list:
         oneyear_list = Belong.objects.filter(start__year=year)
-        oneyear_users = []
+        yearcolumn = [UserTableCell('year',year)]
         for group_list in belong_list:
-            group = group_list[0]
-            oneyear_users.append([])
+            group = group_list.content
+            if group == '':
+                continue
+            users = []
             for belong in oneyear_list:
                 if belong.group.name == group:
-                    oneyear_users[-1].append(belong)
-                elif group == '' and len(oneyear_users[-1]) == 0:
-                    oneyear_users[-1].append(year)
+                    users.append(belong)
+            yearcolumn.append(UserTableCell('users','',users))
+        user_table.append(yearcolumn)
 
-        user_table.append(oneyear_users)
-    
+    notes = Note.objects.all()
+    tags = make_tagcloud(notes)
     
     t = loader.get_template('note/index.html')
     c = Context({
@@ -52,6 +84,7 @@ def index(request):
         'year_list': year_list,
         'groups'   : groups,
         'user_table':user_table,
+        'tags':tags,
         })
     return HttpResponse(t.render(c))
 
@@ -73,13 +106,18 @@ def mylogin(request):
             })
     return HttpResponse(t.render(c))
 
+
 def user(request,user_nick):
     user = MyUser.objects.get(username=user_nick)
-    notes = Note.objects.filter(user=user.id)
+    notes = Note.objects.filter(user=user.id).order_by('-date')
+    tags = make_tagcloud(notes)
+    totaltime = sum([note.elapsed_time for note in notes])
     t = loader.get_template('note/user.html')
     c = Context({
         'user':user,
-        'notes':notes
+        'notes':notes,
+        'tags':tags,
+        'totaltime':totaltime,
         })
     return HttpResponse(t.render(c))
 
@@ -171,9 +209,20 @@ def note(request,user_nick,note_id,year,month):
     t = loader.get_template('note/note.html')
     c = Context({
         'user':user,
-        'note':note
+        'note':note,
         })
     return HttpResponse(t.render(c))
+
+def tag(request,tag_name):
+    tag = Tag.objects.get(name=tag_name)
+    notes = tag.note_set.all()
+    t = loader.get_template('note/tag.html')
+    c = Context({
+        'tag':tag,
+        'notes':notes,
+        })
+    return HttpResponse(t.render(c))
+
 
 ## ノート作成用（日付など）の関数
 def create_select_year(now):

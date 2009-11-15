@@ -1,6 +1,7 @@
 {% extends 'note/base.html' %}
+{% load select_date %}
 {% block title %} 
-ノート詳細
+{{note.title}}
 {% endblock title %}
 {% block content %}
 <h1>詳細表示</h1>
@@ -16,12 +17,32 @@
         <td>{{note.locate}}</td>
     </tr>
     <tr>
+        <td><nobr>開始時刻</nobr></td>
+        <td>{{note.start}}</td>
+    </tr>
+    <tr>
+        <td><nobr>終了時刻</nobr></td>
+        <td>{{note.end}}</td>
+    </tr>
+    <tr>
+        <td><nobr>時間</nobr></td>
+        <td>{{note.elapsed_time|form_elapsed_time}}</td>
+    </tr>
+    <tr>
         <td><nobr>タイトル</nobr></td>
         <td>{{note.title}}</td>
     </tr>
     <tr>
         <td><nobr>内容</nobr></td>
         <td>{{note.content}}</td>
+    </tr>
+    <tr>
+        <td><nobr>タグ</nobr></td>
+        <td>
+            {% for tag in note.tag.all %}
+            <a href="/note/tag/{{tag.name}}/">{{tag.name}}</a>
+            {% endfor %}
+        </td>
     </tr>
 </table>
 {% endif %}

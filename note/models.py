@@ -41,6 +41,12 @@ class Note(models.Model):
     def __unicode__(self):
         return self.title
 
+    def taglist(self):
+        tags = []
+        for tag in self.tag.all():
+            tags.append(tag.name)
+        return ', '.join(tags)
+
 class Comment(models.Model):
     name = models.CharField(max_length=200)
     content = models.TextField()
@@ -50,7 +56,7 @@ class Comment(models.Model):
         return self.name
 
 from django.contrib import admin
-admin.site.register(MyUser)
+#admin.site.register(MyUser)
 admin.site.register(Note)
 admin.site.register(Belong)
 admin.site.register(Tag)

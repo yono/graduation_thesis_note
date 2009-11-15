@@ -29,6 +29,9 @@ urlpatterns = patterns('',
     (r'^note/note_new/$','graduate.note.views.note_new'),
     (r'^note/note_create/$','graduate.note.views.note_create'),
 
+    # タグ
+    (r'^note/tag/(?P<tag_name>\w+)/$','graduate.note.views.tag'),
+
     (r'^note/auth/login/$','graduate.note.views.mylogin'),
 
     # CSS

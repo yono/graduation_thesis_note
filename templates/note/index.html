@@ -5,32 +5,44 @@ Index
 {% endblock title %}
 
 {% block content %}
+<h1>卒研ノート#index</h1>
 {% if user_table %}
-<table border="1">
+<table border="1" cellspacing="0">
     {% for year_list in user_table %}
     <tr>
-        {% for belongs in year_list %}
+        {% for cell in year_list %}
+        {% ifequal cell.category 'users' %}
         <td>
         <ul>
-            {% for belong in belongs %}
-            {% if belong.user %}
-                {% if belong.end %}
-                <li><a
-                    href='/note/user/{{belong.user.username}}/{{belong.start.year}}'/>{{belong.user.fullname}}</a></li>
-                {% else %}
-                <li><a
-                    href='/note/user/{{belong.user.username}}'/>{{belong.user.fullname}}</a></li>
-                {% endif %}
+        {% for belong in cell.users %}
+            {% if belong.end %}
+            <li><a
+                href='/note/user/{{belong.user.username}}/{{belong.start.year}}'/>{{belong.user.fullname}}</a></li>
             {% else %}
-                {{belong}}
+            <li><a
+                href='/note/user/{{belong.user.username}}'/>{{belong.user.fullname}}</a></li>
             {% endif %}
-            {% endfor %}
+        {% endfor %}
         </ul>
         </td>
+        {% endifequal %}
+
+        {% ifequal cell.category 'year' %}
+        <td>{{cell.content}}</td>
+        {% endifequal %}
+
+        {% ifequal cell.category 'belong' %}
+        <th>{{cell.content}}</th>
+        {% endifequal %}
         {% endfor %}
     </tr>
     {% endfor %}
 </table>
+<p>タグ一覧: 
+{% for tag in tags %}
+<a href='/note/tag/{{tag.tag}}/' class='{{tag.cssclass}}'>{{tag.tag}}</a>&nbsp;
+{% endfor %}
+</p>
 {% else %}
 <p> No users are avaliable. </p>
 {% endif %}
