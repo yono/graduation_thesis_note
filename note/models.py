@@ -1,9 +1,17 @@
 from django.db import models
-from django.contrib.auth.models import User, Group
+from django.contrib.auth.models import User as AuthUser, Group
 from django.contrib.auth import models as auth_models
 
-class MyUser(User):
-    belongs = models.ManyToManyField(Group, through='Belong')
+
+class Grade(models.Model):
+    name = models.CharField(max_length=100)
+    priority = models.IntegerField(max_length=100)
+
+    def __unicode__(self):
+        return self.name
+
+class User(AuthUser):
+    belongs = models.ManyToManyField(Grade, through='Belong')
     objects = auth_models.UserManager()
 
     def __unicode__(self):
@@ -13,13 +21,15 @@ class MyUser(User):
         return '%s%s' %  (self.last_name,self.first_name)
 
 class Belong(models.Model):
-    user = models.ForeignKey(MyUser)
-    group = models.ForeignKey(Group)
+    user = models.ForeignKey(User)
+    grade = models.ForeignKey(Grade)
     start = models.DateField()
     end = models.DateField(null=True,blank=True)
 
     def __unicode__(self):
-        return '%s-%s' % (self.group.name,self.user.username)
+        return '%s-%s' % (self.grade.name,self.user.username)
+
+
 
 class Tag(models.Model):
     name = models.CharField(max_length=100,unique=True)
@@ -35,7 +45,7 @@ class Note(models.Model):
     start = models.DateTimeField()
     end = models.DateTimeField()
     elapsed_time = models.IntegerField()
-    user = models.ForeignKey(MyUser)
+    user = models.ForeignKey(User)
     tag = models.ManyToManyField(Tag)
 
     def __unicode__(self):
@@ -56,7 +66,8 @@ class Comment(models.Model):
         return self.name
 
 from django.contrib import admin
-#admin.site.register(MyUser)
+#admin.site.register(User)
 admin.site.register(Note)
 admin.site.register(Belong)
 admin.site.register(Tag)
+admin.site.register(Grade)

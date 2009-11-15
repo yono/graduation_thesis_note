@@ -1,9 +1,9 @@
 # Create your views here.
 # -*- coding:utf-8 -*-
-from django.contrib.auth import authenticate, login
+from django.contrib.auth import authenticate, login, logout
 from django.template import Context, loader
-from graduate.note.models import MyUser,Note, Belong,Tag
-from django.http import HttpResponse
+from graduate.note.models import User,Note,Belong,Tag,Grade
+from django.http import HttpResponse, HttpResponseRedirect
 from datetime import datetime,time,timedelta
 from math import fabs
 
@@ -38,17 +38,23 @@ class UserTableCell(object):
         self.content = content
         self.users = users
 
+def is_logined(request):
+    result = True
+    if request.user.username == '':
+        result = False
+    return result 
+
 def index(request):
-    user_list = MyUser.objects.all()
+    user_list = User.objects.all()
     years = {}
-    groups = {}
+    grades = Grade.objects.all().order_by('-priority')
 
     ## 年度と所属の一覧を集める
     for user in user_list:
         belongs = user.belong_set.all()
         for belong in belongs:
             years[belong.start.year] = 0
-            groups[belong.group.name] = 0
+            #grades[belong.grade.name] = 0
 
     year_list = []
     for year in years:
@@ -56,21 +62,21 @@ def index(request):
     year_list.sort(reverse=True)
 
     user_table = []
-    belong_list = [UserTableCell('belong','')]
-    for group in groups:
-        belong_list.append(UserTableCell('belong',group))
+    belong_list = [UserTableCell('belong','年度')]
+    for grade in grades:
+        belong_list.append(UserTableCell('belong',grade.name))
     user_table.append(belong_list)
 
     for year in year_list:
         oneyear_list = Belong.objects.filter(start__year=year)
         yearcolumn = [UserTableCell('year',year)]
-        for group_list in belong_list:
-            group = group_list.content
-            if group == '':
+        for grade_list in belong_list:
+            grade = grade_list.content
+            if grade == '年度':
                 continue
             users = []
             for belong in oneyear_list:
-                if belong.group.name == group:
+                if belong.grade.name == grade:
                     users.append(belong)
             yearcolumn.append(UserTableCell('users','',users))
         user_table.append(yearcolumn)
@@ -80,11 +86,9 @@ def index(request):
     
     t = loader.get_template('note/index.html')
     c = Context({
-        'user_list': user_list,
-        'year_list': year_list,
-        'groups'   : groups,
         'user_table':user_table,
         'tags':tags,
+        'is_logined':is_logined(request)
         })
     return HttpResponse(t.render(c))
 
@@ -96,7 +100,6 @@ def mylogin(request):
         if user is not None:
             if user.is_active:
                 login(request, user)
-                print '--------- login ----------'
         t = loader.get_template('note/login.html')
         c = Context({
             })
@@ -106,9 +109,13 @@ def mylogin(request):
             })
     return HttpResponse(t.render(c))
 
+def mylogout(request):
+    logout(request)
+    print request.user.username
+    return HttpResponseRedirect('/note/')
 
 def user(request,user_nick):
-    user = MyUser.objects.get(username=user_nick)
+    user = User.objects.get(username=user_nick)
     notes = Note.objects.filter(user=user.id).order_by('-date')
     tags = make_tagcloud(notes)
     totaltime = sum([note.elapsed_time for note in notes])
@@ -122,7 +129,7 @@ def user(request,user_nick):
     return HttpResponse(t.render(c))
 
 def user_year(request,user_nick,year):
-    user = MyUser.objects.get(username=user_nick)
+    user = User.objects.get(username=user_nick)
     notes = Note.objects.filter(date__year=year)
     t = loader.get_template('note/user.html')
     c = Context({
@@ -132,7 +139,7 @@ def user_year(request,user_nick,year):
     return HttpResponse(t.render(c))
 
 def user_month(request,user_nick,year,month):
-    user = MyUser.objects.get(username=user_nick)
+    user = User.objects.get(username=user_nick)
     notes = Note.objects.filter(date__year=year,date__month=month)
     t = loader.get_template('note/user.html')
     c = Context({
@@ -143,7 +150,7 @@ def user_month(request,user_nick,year,month):
 
 def note_new(request):
     if 'user' in request.GET:
-        user = MyUser.objects.get(pk=request.GET['user'])
+        user = User.objects.get(pk=request.GET['user'])
         now = datetime.now()
         t = loader.get_template('note/note_new.html')
         c = Context({
@@ -204,7 +211,7 @@ def note_create(request):
         return index(request)
 
 def note(request,user_nick,note_id,year,month):
-    user = MyUser.objects.get(username=user_nick)
+    user = User.objects.get(username=user_nick)
     note = Note.objects.get(pk=note_id)
     t = loader.get_template('note/note.html')
     c = Context({

@@ -32,7 +32,8 @@ urlpatterns = patterns('',
     # タグ
     (r'^note/tag/(?P<tag_name>\w+)/$','graduate.note.views.tag'),
 
-    (r'^note/auth/login/$','graduate.note.views.mylogin'),
+    (r'^note/auth/login/$','django.contrib.auth.views.login',{'template_name':'note/login.html'}),
+    (r'^note/auth/logout/$','django.contrib.auth.views.logout',{'template_name':'note/logout.html'}),
 
     # CSS
     (r'^site_media/(?P<path>.+)$','django.views.static.serve',{'document_root':'/Users/yono/hg/django/graduate/templates'}),

@@ -9,10 +9,11 @@
             <h1>NAL研卒業研究ノート</h1>
             <a href='/note'>トップページ</a>|
             <a href='/note/belong_list'>所属一覧</a>|
-            <a href='/note/create_user'>新規ユーザー作成</a>|
-            <a href='/note/create_belong'>新規所属作成</a>|
-            <a href='/note/auth/login'>ログイン</a>|
+            {% if is_logined %}
             <a href='/note/auth/logout'>ログアウト</a>|
+            {% else %}
+            <a href='/note/auth/login'>ログイン</a>|
+            {% endif %}
             <a href='/note/rss'>RSS</a>|
             <a href='/note/comment_rss'>コメントRSS</a>
         </div>
