@@ -1,7 +1,8 @@
 # Create your views here.
 # -*- coding:utf-8 -*-
+from django.contrib.auth.decorators import login_required
 from django.contrib.auth import authenticate, login, logout
-from django.template import Context, loader
+from django.template import Context, loader, RequestContext
 from graduate.note.models import User,Note,Belong,Tag,Grade
 from django.http import HttpResponse, HttpResponseRedirect
 from datetime import datetime,time,timedelta
@@ -12,9 +13,11 @@ class TagCloud(object):
         self.tag = tag
         self.cssclass = cssclass
 
-def make_tagcloud(notes):
+def make_tagcloud(notes=[]):
     css_classes = ['nube1','nube2','nube3','nube4','nube5']
     tags = {}
+    if len(notes) == 0:
+        notes = Note.objects.all()
     for note in notes:
         for tag in note.tag.all():
             tags[tag.name] = tags.get(tag.name, 0) + 1
@@ -37,12 +40,6 @@ class UserTableCell(object):
         self.category = category
         self.content = content
         self.users = users
-
-def is_logined(request):
-    result = True
-    if request.user.username == '':
-        result = False
-    return result 
 
 def index(request):
     user_list = User.objects.all()
@@ -88,31 +85,24 @@ def index(request):
     c = Context({
         'user_table':user_table,
         'tags':tags,
-        'is_logined':is_logined(request)
+        })
+
+    return HttpResponse(t.render(c))
+
+@login_required
+def profile(request):
+    user = User.objects.get(username=request.user)
+    notes = Note.objects.filter(user=user.id).order_by('-date')
+    tags = make_tagcloud(notes)
+    totaltime = sum([note.elapsed_time for note in notes])
+    t = loader.get_template('note/profile.html')
+    c = Context({
+        'user':user,
+        'notes':notes,
+        'tags':tags,
+        'totaltime':totaltime,
         })
     return HttpResponse(t.render(c))
-
-def mylogin(request):
-    if 'username' in request.POST and 'password' in request.POST:
-        username = request.POST['username']
-        password = request.POST['password']
-        user = authenticate(username=username,password=password)
-        if user is not None:
-            if user.is_active:
-                login(request, user)
-        t = loader.get_template('note/login.html')
-        c = Context({
-            })
-    else:
-        t = loader.get_template('note/login.html')
-        c = Context({
-            })
-    return HttpResponse(t.render(c))
-
-def mylogout(request):
-    logout(request)
-    print request.user.username
-    return HttpResponseRedirect('/note/')
 
 def user(request,user_nick):
     user = User.objects.get(username=user_nick)
@@ -130,21 +120,31 @@ def user(request,user_nick):
 
 def user_year(request,user_nick,year):
     user = User.objects.get(username=user_nick)
-    notes = Note.objects.filter(date__year=year)
+    notes = Note.objects.filter(user__username=user_nick,date__year=year)
+    tags = make_tagcloud(notes)
+    totaltime = sum([note.elapsed_time for note in notes])
     t = loader.get_template('note/user.html')
     c = Context({
         'user':user,
-        'notes':notes
+        'notes':notes,
+        'tags':tags,
+        'totaltime':totaltime,
+        'year':year,
         })
     return HttpResponse(t.render(c))
 
 def user_month(request,user_nick,year,month):
     user = User.objects.get(username=user_nick)
-    notes = Note.objects.filter(date__year=year,date__month=month)
+    notes = Note.objects.filter(user__username=user_nick,
+            date__year=year,date__month=month)
+    tags = make_tagcloud(notes)
+    totaltime = sum([note.elapsed_time for note in notes])
     t = loader.get_template('note/user.html')
     c = Context({
         'user':user,
-        'notes':notes
+        'notes':notes,
+        'tags':tags,
+        'totaltime':totaltime,
         })
     return HttpResponse(t.render(c))
 

@@ -4,26 +4,4 @@ Logout
 {% endblock title %}
 {% block content %}
 <h1>ログアウトしました</h1>
-<hr>
-<h2>ログインフォーム</h2>
-<form action"." method="post">
-    {% csrf_token %}
-<table>
-    <tr>
-        <td>名前:</td>
-        <td><input id="username" name="username" size="30" type="text"
-            value="" /></td>
-    </tr>
-    <tr>
-        <td>パスワード:</td>
-        <td><input id="password" name="password" size="30"
-            type="password" /></td>
-    </tr>
-    <tr>
-        <td colspan="2">
-            <input type="submit" value="ログイン" />
-        </td>
-    </tr>
-</table>
-</form>
 {% endblock content %}
