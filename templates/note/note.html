@@ -6,7 +6,7 @@
 {% block content %}
 <h1>詳細表示</h1>
 {% if note %}
-<p>{{user.username}}</p>
+<p>{{theuser.username}}</p>
 <table border="1" cellspacing="0" width="750px">
     <tr>
         <td width="100px"><nobr>日付</nobr></td>
@@ -45,5 +45,11 @@
         </td>
     </tr>
 </table>
+<br>
 {% endif %}
+{% ifequal user.username note.user.username %}
+<a href='/note/note_edit/{{note.id}}/'>編集</a>|
+{% endifequal %}
+<a
+    href='/note/user/{{theuser.username}}/'>{{theuser.fullname}}のノート一覧</a>
 {% endblock content %}

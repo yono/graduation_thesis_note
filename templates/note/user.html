@@ -1,16 +1,44 @@
 {% extends "note/base.html" %}
 {% load select_date %}
 {% block title %}
-{{user.fullname}}のノート一覧
+{% if year %}{{year}}年度 {% endif %}
+{% if month %}{{month}}月 {% endif %}
+{{theuser.fullname}} のノート一覧
 {% endblock title %}
 {% block content %}
-<h1>{{user.fullname}} のノート一覧</h1>
-{% if notes %}
+<h1>{% if year %}{{year}}年度 {% endif %}
+    {% if month %}{{month}}月 {% endif %}
+    {{theuser.fullname}} のノート一覧</h1>
 <p>タグ一覧:
 {% for tag in tags %}
 <a href='/note/tag/{{tag.tag}}/' class='{{tag.cssclass}}'>{{tag.tag}}</a>&nbsp;
 {% endfor %}
 </p>
+
+{% if belongs %}
+<form action='/note/user/{{theuser.username}}/' method='GET'>
+<select id='belong' name='year'>
+{% for belong in belongs %}
+<option
+value='{{belong.start.year}}'>{{belong.grade}}/{{belong.start.year}}</option>
+{% endfor %}
+</select>
+<input type='submit' value='　表示　'/>
+</form>
+{% endif %}
+
+{% if dates %}
+<form action='/note/user/{{theuser.username}}/' method='GET'>
+<select id='year-month' name='year-month'>
+{% for date in dates %}
+<option value='{{date.year}}-{{date.month}}'>{{date.year}}-{{date.month}}</option>
+{% endfor %}
+</select>月分
+<input type='submit' value='　表示　' />
+</form>
+{% endif %}
+
+{% if notes %}
 <table border="1" cellspacing="0">
     <tr>
         <th>日付</th><th>タイトル</th><th>開始時刻</th><th>終了時刻</th><th>時
@@ -19,7 +47,7 @@
     {% for note in notes %}
     <tr>
         <td>{{note.date}}</td>
-        <td><a href="/note/user/{{user.username}}/{{note.date.year}}/{{note.date.month}}/{{note.id}}">{{note.title}}</a></td>
+        <td><a href="/note/user/{{theuser.username}}/{{note.date.year}}/{{note.date.month}}/{{note.id}}">{{note.title}}</a></td>
         <td>{{note.start}}</td>
         <td>{{note.end}}</td>
         <td>{{note.elapsed_time|form_elapsed_time}}</td>
@@ -28,6 +56,8 @@
     {% endfor %}
 </table>
 <div><h1>合計時間: {{totaltime|form_elapsed_time}}</h1></div>
+<a
+    href='/note/user/{{theuser.username}}/'>{{theuser.fullname}}のノート一覧</a>
 {% else %}
 <p> No notes are avaliable. </p>
 {% endif %}

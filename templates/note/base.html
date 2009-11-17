@@ -7,18 +7,18 @@
     <body>
         <div class="header">
             <h1>NAL研卒業研究ノート</h1>
-            <a href='/note'>トップページ</a>|
+            <a href='/note/'>トップページ</a>|
             {% if user.username %}
-            <a href='/note/profile/'>ホーム</a>|
+            <a href='/note/home/'>ホーム</a>|
             {% endif %}
-            <a href='/note/belong_list'>所属一覧</a>|
+            <a href='/note/belong_list/'>所属一覧</a>|
             {% if user.username %}
-            <a href='/note/auth/logout'>ログアウト</a>|
+            <a href='/note/auth/logout/'>ログアウト</a>|
             {% else %}
-            <a href='/note/auth/login'>ログイン</a>|
+            <a href='/note/auth/login/'>ログイン</a>|
             {% endif %}
-            <a href='/note/rss'>RSS</a>|
-            <a href='/note/comment_rss'>コメントRSS</a>|
+            <a href='/note/rss/'>RSS</a>|
+            <a href='/note/comment_rss/'>コメントRSS</a>|
         </div>
 
         <div class="content">

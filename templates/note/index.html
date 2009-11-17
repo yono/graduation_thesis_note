@@ -17,7 +17,7 @@ Index
         {% for belong in cell.users %}
             {% if belong.end %}
             <li><a
-                href='/note/user/{{belong.user.username}}/{{belong.start.year}}'/>{{belong.user.fullname}}</a></li>
+                href='/note/user/{{belong.user.username}}?year={{belong.start.year}}'/>{{belong.user.fullname}}</a></li>
             {% else %}
             <li><a
                 href='/note/user/{{belong.user.username}}'/>{{belong.user.fullname}}</a></li>

@@ -1,18 +1,18 @@
 {% extends "note/base.html" %}
 {% load select_date %}
 {% block title %}
-新規ノート追加
+ノート編集
 {% endblock title %}
 {% block content %}
-<h1>新規ノート作成</h1>
-<p>{{theuser.username}} の研究ノートを追加する</p>
+<h1>ノート編集</h1>
+<p>{{note.user.username}} の研究ノートを編集する</p>
 
-<form action='/note/note_create/' method="post">
+<form action='/note/note_update/{{note.id}}/' method="post">
 <table>
 <tr>
     <td>User_id</td>
-    <td>{{theuser.id}}<input id="note_user_id" name="note_user_id" type="hidden"
-        value="{{theuser.id}}" /></td>
+    <td>{{note.user.id}}<input id="note_user_id" name="note_user_id" type="hidden"
+        value="{{note.user.id}}" /></td>
 </tr>
 
 <tr>
@@ -38,28 +38,28 @@
 <tr>
 <td><label>開始時刻</label></td>
 <td><select id="note_start_y" name="note_start_y">
-{% for year in date_year %}
+{% for year in start_year %}
 <option value="{{year|select_date}}" {{year|is_selected}}>{{year|select_date}}</option>
 {% endfor %}
 </select>
 <select id="note_start_m" name="note_start_m">
-{% for month in date_month %}
+{% for month in start_month %}
 <option value="{{month|select_date}}" {{month|is_selected}}>{{month|select_date}}</option>
 {% endfor %}
 </select>
 <select id="note_start_d" name="note_start_d">
-{% for day in date_day %}
+{% for day in start_day %}
 <option value="{{day|select_date}}"{{day|is_selected}}>{{day|select_date}}</option>
 {% endfor %}
 </select>
 &mdash;
 <select id="note_start_h" name="note_start_h">
-{% for hour in date_hour %}
+{% for hour in start_hour %}
 <option value="{{hour|select_date}}"{{hour|is_selected}}>{{hour|select_date}}</option>
 {% endfor %}
 </select>
 <select id="note_start_mi" name="note_start_mi">
-{% for min in date_min %}
+{% for min in start_min %}
 <option value="{{min|select_date}}" {{min|is_selected}}>{{min|select_date}}</option>
 {% endfor %}
 </select>
@@ -69,28 +69,28 @@
 <tr>
 <td><label>終了時刻</label></td>
 <td><select id="note_end_y" name="note_end_y">
-{% for year in date_year %}
+{% for year in end_year %}
 <option value="{{year|select_date}}"{{year|is_selected}}>{{year|select_date}}</option>
 {% endfor %}
 </select>
 <select id="note_end_m" name="note_end_m">
-{% for month in date_month %}
+{% for month in end_month %}
 <option value="{{month|select_date}}"{{month|is_selected}}>{{month|select_date}}</option>
 {% endfor %}
 </select>
 <select id="note_end_d" name="note_end_d">
-{% for day in date_day %}
+{% for day in end_day %}
 <option value="{{day|select_date}}"{{day|is_selected}}>{{day|select_date}}</option>
 {% endfor %}
 </select>
 &mdash;
 <select id="note_end_h" name="note_end_h">
-{% for hour in date_hour %}
+{% for hour in end_hour %}
 <option value="{{hour|select_date}}"{{hour|is_selected}}>{{hour|select_date}}</option>
 {% endfor %}
 </select>
 <select id="note_end_mi" name="note_end_mi">
-{% for min in date_min %}
+{% for min in end_min %}
 <option value="{{min|select_date}}"{{min|is_selected}}>{{min|select_date}}</option>
 {% endfor %}
 </select>
@@ -100,42 +100,45 @@
 <tr>
 <td><label>経過時間</label></td>
 <td>
-<input id="hour" name="hour" size="5" type="text" value="0" />時間<input
-id="min" name="min" size="5" type="text" value="0" />分 ※新規作成時は自動計算
-されます
+    <input id="hour" name="hour" size="5" type="text"
+    value="{{elapsed_hour}}" />時間<input
+    id="min" name="min" size="5" type="text" value="{{elapsed_min}}" />分
 </td>
 </tr>
     
 <tr>
 <td><label>タイトル</label></td>
 <td>
-<input id="note_title" name="note_title" type="text" value="" />
+    <input id="note_title" name="note_title" type="text" value="{{note.title}}" />
 </td>
 </tr>
     
 <tr>
 <td><label>内容</label></td>
 <td>
-<textarea cols="70" id="note_content" name="note_content" rows="20"></textarea>
+    <textarea cols="70" id="note_content" name="note_content" rows="20">{{note.content}}</textarea>
 </td>
 </tr>
 
 <tr>
 <td><label>場所</label></td>
 <td>
-<input id="note_locate" name="note_locate" size="10" type="text" value="" />
+    <input id="note_locate" name="note_locate" size="10" type="text"
+    value="{{note.locate}}" />
 </td>
 </tr>
 
 <tr>
 <td><label>Tag</label></td>
 <td>
-<input id="note_tag_list" name="note_tag_list" size="30" type="text" value="" />
+<input id="note_tag_list" name="note_tag_list" size="30" type="text" 
+value="{% for tag in note.tag.all %}{{tag}},{% endfor %}"
+/>
 </td>
 </tr>
 
 </table>
-<input name="commit" type="submit" value="Create" />
+<input name="commit" type="submit" value="Update" />
 </form>
 
 {% endblock content %}

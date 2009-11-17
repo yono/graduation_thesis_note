@@ -16,8 +16,8 @@ class TagCloud(object):
 def make_tagcloud(notes=[]):
     css_classes = ['nube1','nube2','nube3','nube4','nube5']
     tags = {}
-    if len(notes) == 0:
-        notes = Note.objects.all()
+    #if len(notes) == 0:
+    #    notes = Note.objects.all()
     for note in notes:
         for tag in note.tag.all():
             tags[tag.name] = tags.get(tag.name, 0) + 1
@@ -61,7 +61,7 @@ def index(request):
     user_table = []
     belong_list = [UserTableCell('belong','年度')]
     for grade in grades:
-        belong_list.append(UserTableCell('belong',grade.name))
+        belong_list.append(UserTableCell('belong',grade.formalname))
     user_table.append(belong_list)
 
     for year in year_list:
@@ -73,7 +73,7 @@ def index(request):
                 continue
             users = []
             for belong in oneyear_list:
-                if belong.grade.name == grade:
+                if belong.grade.formalname == grade:
                     users.append(belong)
             yearcolumn.append(UserTableCell('users','',users))
         user_table.append(yearcolumn)
@@ -82,7 +82,7 @@ def index(request):
     tags = make_tagcloud(notes)
     
     t = loader.get_template('note/index.html')
-    c = Context({
+    c = RequestContext(request,{
         'user_table':user_table,
         'tags':tags,
         })
@@ -90,71 +90,92 @@ def index(request):
     return HttpResponse(t.render(c))
 
 @login_required
-def profile(request):
+def home(request):
     user = User.objects.get(username=request.user)
     notes = Note.objects.filter(user=user.id).order_by('-date')
     tags = make_tagcloud(notes)
     totaltime = sum([note.elapsed_time for note in notes])
-    t = loader.get_template('note/profile.html')
-    c = Context({
-        'user':user,
+    t = loader.get_template('note/home.html')
+    c = RequestContext(request,{
+        'theuser':user,
         'notes':notes,
         'tags':tags,
         'totaltime':totaltime,
         })
     return HttpResponse(t.render(c))
+
+class NoteDate(object):
+    def __init__(self,year,month):
+        self.year  = year
+        self.month = month
+
+def get_note_month(notes):
+    dates_t = {}
+    for note in notes:
+        year = note.date.year
+        month = note.date.month
+        dates_t[(year,month)] = 0
+    
+    dates_t = dates_t.keys()
+    dates_t.sort(cmp=lambda x,y:cmp(x[0]+x[1], y[0]+y[1]),reverse=True)
+    
+    dates = []
+    for date in dates_t:
+        dates.append(NoteDate(date[0],date[1]))
+    return dates
 
 def user(request,user_nick):
     user = User.objects.get(username=user_nick)
-    notes = Note.objects.filter(user=user.id).order_by('-date')
+
+    
+    resultdict = {}
+    dates = []
+    if ('year' in request.GET and 'month' in request.GET) or 'year-month' in request.GET:
+        if ('year' in request.GET):
+            year = request.GET['year']
+            month = request.GET['month']
+        else:
+            year,month = request.GET['year-month'].split('-')
+
+        resultdict['year'] = year
+        resultdict['month'] = month
+        belong = Belong.objects.get(user=user,start__year=year)
+        notes = Note.objects.filter(user__username=user_nick,date__gt=belong.start,date__lt=belong.end,date__month=month).order_by('-date')
+        notes_all = Note.objects.filter(user=user.id).order_by('-date')
+        dates = get_note_month(notes_all)
+    elif 'year' in request.GET:
+        resultdict['year'] = request.GET['year']
+        belong = Belong.objects.get(user=user,start__year=request.GET['year'])
+        notes = Note.objects.filter(user__username=user_nick,date__gt=belong.start,date__lt=belong.end).order_by('-date')
+        notes_all = Note.objects.filter(user=user.id).order_by('-date')
+        dates = get_note_month(notes_all)
+    else:
+        notes = Note.objects.filter(user=user.id).order_by('-date')
+
     tags = make_tagcloud(notes)
+
+    belongs = Belong.objects.filter(user=user)
     totaltime = sum([note.elapsed_time for note in notes])
+    resultdict.update({
+            'theuser':user,
+            'notes':notes,
+            'tags':tags,
+            'totaltime':totaltime,
+            'dates':dates,
+            'belongs':belongs,
+            })
     t = loader.get_template('note/user.html')
-    c = Context({
-        'user':user,
-        'notes':notes,
-        'tags':tags,
-        'totaltime':totaltime,
-        })
+    c = RequestContext(request,resultdict)
     return HttpResponse(t.render(c))
 
-def user_year(request,user_nick,year):
-    user = User.objects.get(username=user_nick)
-    notes = Note.objects.filter(user__username=user_nick,date__year=year)
-    tags = make_tagcloud(notes)
-    totaltime = sum([note.elapsed_time for note in notes])
-    t = loader.get_template('note/user.html')
-    c = Context({
-        'user':user,
-        'notes':notes,
-        'tags':tags,
-        'totaltime':totaltime,
-        'year':year,
-        })
-    return HttpResponse(t.render(c))
-
-def user_month(request,user_nick,year,month):
-    user = User.objects.get(username=user_nick)
-    notes = Note.objects.filter(user__username=user_nick,
-            date__year=year,date__month=month)
-    tags = make_tagcloud(notes)
-    totaltime = sum([note.elapsed_time for note in notes])
-    t = loader.get_template('note/user.html')
-    c = Context({
-        'user':user,
-        'notes':notes,
-        'tags':tags,
-        'totaltime':totaltime,
-        })
-    return HttpResponse(t.render(c))
-
+@login_required
 def note_new(request):
     if 'user' in request.GET:
         user = User.objects.get(pk=request.GET['user'])
         now = datetime.now()
         t = loader.get_template('note/note_new.html')
-        c = Context({
-            'user':user,
+        c = RequestContext(request,{
+            'theuser':user,
             'date_year' :create_select_year(now),
             'date_month':create_select_month(now),
             'date_day'  :create_select_day(now),
@@ -165,6 +186,7 @@ def note_new(request):
     else:
         return index(request)
 
+@login_required
 def note_create(request):
     if 'note_user_id' not in request.POST:
         return note_new(request) 
@@ -191,6 +213,7 @@ def note_create(request):
         end = datetime(end_y,end_m,end_d,end_h,end_mi)
         elapsed_time = end - start
         elapsed_min = (elapsed_time.seconds)/60
+        content = content.replace('\n','<br />')
         note = Note(title=title,content=content,locate=locate,date=date,
                 start=start,end=end,elapsed_time=elapsed_min,user_id=user_id)
         note.save()
@@ -207,15 +230,102 @@ def note_create(request):
                     tag_obj = tag_list[0]
                 note.tag.add(tag_obj) 
             note.save()
+         
+        t = loader.get_template('note/note.html')
+        c = RequestContext(request,{
+            'theuser':note.user,
+            'note':note,
+            })
+        return HttpResponse(t.render(c))
 
-        return index(request)
+def note_edit(request,note_id):
+    note = Note.objects.get(pk=note_id)
+    now = note.date
+    start = note.start
+    end = note.end
 
-def note(request,user_nick,note_id,year,month):
+    elapsed_hour = note.elapsed_time / 60
+    elapsed_min  = note.elapsed_time % 60
+
+    t = loader.get_template('note/note_edit.html')
+    c = RequestContext(request,{
+        'note':note,
+        'theuser':user,
+        'date_year'  :create_select_year(now),
+        'date_month' :create_select_month(now),
+        'date_day'   :create_select_day(now),
+        'start_year' :create_select_year(start),
+        'start_month':create_select_month(start),
+        'start_day'  :create_select_day(start),
+        'start_hour' :create_select_hour(start),
+        'start_min'  :create_select_min(start),
+        'end_year'   :create_select_year(end),
+        'end_month'  :create_select_month(end),
+        'end_day'    :create_select_day(end),
+        'end_hour'   :create_select_hour(end),
+        'end_min'    :create_select_min(end),
+        'elapsed_hour':elapsed_hour,
+        'elapsed_min':elapsed_min,
+        })
+    return HttpResponse(t.render(c))
+
+def note_update(request,note_id):
+    note = Note.objects.get(pk=note_id)
+    user_id = request.POST['note_user_id']
+    title = request.POST['note_title']
+    content = request.POST['note_content']
+    locate = int(request.POST['note_locate'])
+    date_y = int(request.POST['note_date_y'])
+    date_m = int(request.POST['note_date_m'])
+    date_d = int(request.POST['note_date_d'])
+    date = datetime(date_y,date_m,date_d)
+    start_y = int(request.POST['note_start_y'])
+    start_m = int(request.POST['note_start_m'])
+    start_d = int(request.POST['note_start_d'])
+    start_h = int(request.POST['note_start_h'])
+    start_mi = int(request.POST['note_start_mi'])
+    start = datetime(start_y,start_m,start_d,start_h,start_mi)
+    end_y = int(request.POST['note_end_y'])
+    end_m = int(request.POST['note_end_m'])
+    end_d = int(request.POST['note_end_d'])
+    end_h = int(request.POST['note_end_h'])
+    end_mi = int(request.POST['note_end_mi'])
+    end = datetime(end_y,end_m,end_d,end_h,end_mi)
+    elapsed_min = int(request.POST['hour']*60) + int(request.POST['min'])
+    content = content.replace('\n','<br />')
+    note.title = title
+    note.content = content
+    note.locate = locate
+    note.date = date
+    note.start = start
+    note.end = end
+    print elapsed_min
+    note.elapsed_time = elapsed_min
+    note.save()
+
+    note.tag.clear()
+    if request.POST['note_tag_list'] != '':
+        tags = request.POST['note_tag_list'].split(',')
+        for tag in tags:
+            tag_list = Tag.objects.filter(name=tag)
+            tag_obj = None
+            if len(tag_list) == 0:
+                tag_obj = Tag(name=tag)
+                tag_obj.save()
+            else:
+                tag_obj = tag_list[0]
+            note.tag.add(tag_obj) 
+        note.save()
+    
+    return HttpResponseRedirect('/note/user/%s/%d/%d/%d' %
+            (note.user.username,note.date.year,note.date.month,note.id))
+
+def note(request,user_nick,year,month,note_id):
     user = User.objects.get(username=user_nick)
     note = Note.objects.get(pk=note_id)
     t = loader.get_template('note/note.html')
-    c = Context({
-        'user':user,
+    c = RequestContext(request,{
+        'theuser':user,
         'note':note,
         })
     return HttpResponse(t.render(c))
@@ -224,7 +334,7 @@ def tag(request,tag_name):
     tag = Tag.objects.get(name=tag_name)
     notes = tag.note_set.all()
     t = loader.get_template('note/tag.html')
-    c = Context({
+    c = RequestContext(request,{
         'tag':tag,
         'notes':notes,
         })

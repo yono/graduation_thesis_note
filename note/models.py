@@ -5,6 +5,7 @@ from django.contrib.auth import models as auth_models
 
 class Grade(models.Model):
     name = models.CharField(max_length=100)
+    formalname = models.CharField(max_length=100)
     priority = models.IntegerField(max_length=100)
 
     def __unicode__(self):

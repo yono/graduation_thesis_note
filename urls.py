@@ -9,10 +9,6 @@ urlpatterns = patterns('',
     # Example:
     # (r'^graduate/', include('graduate.foo.urls')),
 
-    # Uncomment the admin/doc line below and add 'django.contrib.admindocs' 
-    # to INSTALLED_APPS to enable admin documentation:
-    # (r'^admin/doc/', include('django.contrib.admindocs.urls')),
-
     # Uncomment the next line to enable the admin:
     (r'^admin/', include(admin.site.urls)),
     (r'^note/$','graduate.note.views.index'),
@@ -20,8 +16,7 @@ urlpatterns = patterns('',
     (r'^note/user/(?P<user_nick>\w+)/$','graduate.note.views.user'),
     # ユーザの年度別のノート一覧
     (r'^note/user/(?P<user_nick>\w+)/(?P<year>\d+)/$','graduate.note.views.user_year'),
-    # ユーザの月ごとのノート一覧
-    (r'^note/user/(?P<user_nick>\w+)/(?P<year>\d+)/(?P<month>\d+)/$','graduate.note.views.user_month'),
+
     # ユーザのノート詳細
     (r'^note/user/(?P<user_nick>\w+)/(?P<year>\d+)/(?P<month>\d+)/(?P<note_id>\d+)/$','graduate.note.views.note'),
 
@@ -29,11 +24,17 @@ urlpatterns = patterns('',
     (r'^note/note_new/$','graduate.note.views.note_new'),
     (r'^note/note_create/$','graduate.note.views.note_create'),
 
-    (r'^note/profile/$','graduate.note.views.profile'),
+    # ノート編集
+    (r'^note/note_edit/(?P<note_id>\d+)/$','graduate.note.views.note_edit'),
+    (r'^note/note_update/(?P<note_id>\d+)/$','graduate.note.views.note_update'),
+
+    # mixiで言うところのホーム
+    (r'^note/home/$','graduate.note.views.home'),
 
     # タグ
     (r'^note/tag/(?P<tag_name>\w+)/$','graduate.note.views.tag'),
 
+    # ユーザ認証
     (r'^note/auth/login/$','django.contrib.auth.views.login',{'template_name':'note/login.html'}),
     (r'^note/auth/logout/$','django.contrib.auth.views.logout',{'template_name':'note/logout.html'}),
 

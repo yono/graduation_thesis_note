@@ -1,11 +1,11 @@
 {% extends "note/base.html" %}
 {% load select_date %}
 {% block title %}
-{{user.fullname}}のノート一覧
+{{theuser.fullname}}のノート一覧
 {% endblock title %}
 {% block content %}
-<h1>{{user.fullname}} のノート一覧</h1>
-<p><a href="/note/note_new?user={{user.id}}">新規作成</a></p>
+<h1>{{theuser.fullname}} のノート一覧</h1>
+<p><a href="/note/note_new?user={{theuser.id}}">新規作成</a></p>
 {% if notes %}
 <p>タグ一覧: 
 {% for tag in tags %}
@@ -20,7 +20,7 @@
     {% for note in notes %}
     <tr>
         <td>{{note.date}}</td>
-        <td><a href="/note/user/{{user.username}}/{{note.date.year}}/{{note.date.month}}/{{note.id}}">{{note.title}}</a></td>
+        <td><a href="/note/user/{{theuser.username}}/{{note.date.year}}/{{note.date.month}}/{{note.id}}">{{note.title}}</a></td>
         <td>{{note.start}}</td>
         <td>{{note.end}}</td>
         <td>{{note.elapsed_time|form_elapsed_time}}</td>
