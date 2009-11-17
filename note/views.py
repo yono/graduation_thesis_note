@@ -95,12 +95,14 @@ def home(request):
     notes = Note.objects.filter(user=user.id).order_by('-date')
     tags = make_tagcloud(notes)
     totaltime = sum([note.elapsed_time for note in notes])
+    belongs = Belong.objects.filter(user=user)
     t = loader.get_template('note/home.html')
     c = RequestContext(request,{
         'theuser':user,
         'notes':notes,
         'tags':tags,
         'totaltime':totaltime,
+        'belongs':belongs,
         })
     return HttpResponse(t.render(c))
 

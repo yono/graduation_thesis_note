@@ -9,6 +9,9 @@
 <h1>{% if year %}{{year}}年度 {% endif %}
     {% if month %}{{month}}月 {% endif %}
     {{theuser.fullname}} のノート一覧</h1>
+{% ifequal user.username theuser.username %}
+<p><a href="/note/note_new?user={{theuser.id}}">新規作成</a></p>
+{% endifequal %}
 <p>タグ一覧:
 {% for tag in tags %}
 <a href='/note/tag/{{tag.tag}}/' class='{{tag.cssclass}}'>{{tag.tag}}</a>&nbsp;

@@ -12,6 +12,17 @@
 <a href='/note/tag/{{tag.tag}}/' class='{{tag.cssclass}}'>{{tag.tag}}</a>&nbsp;
 {% endfor %}
 </p>
+{% if belongs %}
+<form action='/note/user/{{theuser.username}}/' method='GET'>
+<select id='belong' name='year'>
+{% for belong in belongs %}
+<option
+value='{{belong.start.year}}'>{{belong.grade}}/{{belong.start.year}}</option>
+{% endfor %}
+</select>
+<input type='submit' value='　表示　'/>
+</form>
+{% endif %}
 <table border="1" cellspacing="0">
     <tr>
         <th>日付</th><th>タイトル</th><th>開始時刻</th><th>終了時刻</th><th>時
