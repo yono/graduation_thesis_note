@@ -3,7 +3,7 @@
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import authenticate, login, logout
 from django.template import Context, loader, RequestContext
-from graduate.note.models import User,Note,Belong,Tag,Grade
+from graduate.note.models import User,Note,Belong,Tag,Grade,Comment
 from django.http import HttpResponse, HttpResponseRedirect
 from datetime import datetime,time,timedelta
 from math import fabs
@@ -248,6 +248,8 @@ def note_edit(request,note_id):
     start = note.start
     end = note.end
 
+    note.content = note.content.replace('<br />','\n')
+
     elapsed_hour = note.elapsed_time / 60
     elapsed_min  = note.elapsed_time % 60
 
@@ -279,6 +281,7 @@ def note_update(request,note_id):
     user_id = request.POST['note_user_id']
     title = request.POST['note_title']
     content = request.POST['note_content']
+    content = content.replace('\n','<br />')
     locate = int(request.POST['note_locate'])
     date_y = int(request.POST['note_date_y'])
     date_m = int(request.POST['note_date_m'])
@@ -343,13 +346,31 @@ def note_destroy(request,note_id):
 
     return HttpResponseRedirect('/note/user/%s/' % (user.username))
 
+def post_comment(request):
+    print request.POST
+    if 'comment_note_id' in request.POST:
+        note_id = int(request.POST['comment_note_id'])
+        note = Note.objects.get(pk=note_id)
+        user = note.user
+        name = request.POST['comment_name']
+        content = request.POST['comment_content']
+        content = content.replace('\n','<br />')
+        posted_date = datetime.now()
+        comment = Comment(note=note,name=name,content=content,posted_date=posted_date)
+        comment.save()
+        return HttpResponseRedirect('/note/user/%s/%d/' % (user.username,note_id))
+    else:
+        return HttpResponseRedirect('/note/')
+
 def note(request,user_nick,note_id):
     user = User.objects.get(username=user_nick)
     note = Note.objects.get(pk=note_id)
+    comments = Comment.objects.filter(note=note)
     t = loader.get_template('note/note.html')
     c = RequestContext(request,{
         'theuser':user,
         'note':note,
+        'comments':comments,
         })
     return HttpResponse(t.render(c))
 

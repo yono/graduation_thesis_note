@@ -47,6 +47,38 @@
 </table>
 <br>
 {% endif %}
+
+<h2>コメント</h2>
+{% for comment in comments %}
+<table border="1" cellspacing="0">
+<tr>
+    <td>本文</td>
+    <td>{{comment.content|safe}}</td>
+</tr>
+<tr>
+    <td>投稿者</td>
+    <td>{{comment.name}}</td>
+</tr>
+<tr>
+    <td>日付</td>
+    <td>{{comment.posted_date}}</td>
+</tr>
+</table>
+{% endfor %}
+
+{% if user %}
+<form action='/note/post_comment/' method="POST">
+<p><label>Name</label>
+<input id="comment_name" name="comment_name" size="30" type="text" /></p>
+<p><label>Res</label>
+<textarea cols="40" id="comment_content" name="comment_content" rows="15">
+</textarea></p>
+<input id="comment_note_id" name="comment_note_id" type="hidden"
+value="{{note.id}}" />
+<input name="commit" type="submit" value="コメント投稿" />
+</form>
+{% endif %}
+
 {% ifequal user.username note.user.username %}
 <a href='/note/note_edit/{{note.id}}/'>編集</a>|
 {% endifequal %}

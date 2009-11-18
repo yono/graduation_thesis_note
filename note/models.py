@@ -30,8 +30,6 @@ class Belong(models.Model):
     def __unicode__(self):
         return '%s-%s' % (self.grade.name,self.user.username)
 
-
-
 class Tag(models.Model):
     name = models.CharField(max_length=100,unique=True)
 
@@ -65,12 +63,12 @@ class Comment(models.Model):
     name = models.CharField(max_length=200)
     content = models.TextField()
     note = models.ForeignKey(Note)
+    posted_date = models.DateTimeField()
 
     def __unicode__(self):
         return self.name
 
 from django.contrib import admin
-#admin.site.register(User)
 admin.site.register(Note)
 admin.site.register(Belong)
 admin.site.register(Tag)

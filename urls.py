@@ -36,6 +36,9 @@ urlpatterns = patterns('',
     (r'^note/note_delete/(?P<note_id>\d+)/$','graduate.note.views.note_delete'),
     (r'^note/note_destroy/(?P<note_id>\d+)/$','graduate.note.views.note_destroy'),
 
+    # コメント
+    (r'^note/post_comment/$','graduate.note.views.post_comment'),
+
     # mixiで言うところのホーム
     (r'^note/home/$','graduate.note.views.home'),
 
@@ -45,7 +48,6 @@ urlpatterns = patterns('',
     # ユーザ認証
     (r'^note/auth/login/$','django.contrib.auth.views.login',{'template_name':'note/login.html'}),
     (r'^note/auth/logout/$','django.contrib.auth.views.logout',{'template_name':'note/logout.html'}),
-
 
     #RSS
     (r'^note/rss/(?P<url>.*)/$','django.contrib.syndication.views.feed',{'feed_dict':feeds}),
