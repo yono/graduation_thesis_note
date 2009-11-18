@@ -19,17 +19,17 @@
 <td><label>日付</label></td>
 <td><select id="note_date_y" name="note_date_y">
 {% for year in date_year %}
-<option value="{{year|select_date}}" {{year|is_selected}}>{{year|select_date}}</option>
+<option value="{{year.num}}" {{year.selected|safe}}>{{year.num}}</option>
 {% endfor %}
 </select>
 <select id="note_date_m" name="note_date_m">
 {% for month in date_month %}
-<option value="{{month|select_date}}" {{month|is_selected}}>{{month|select_date}}</option>
+<option value="{{month.num}}" {{month.selected|safe}}>{{month.num}}</option>
 {% endfor %}
 </select>
 <select id="note_date_d" name="note_date_d">
 {% for day in date_day %}
-<option value="{{day|select_date}}" {{day|is_selected}}>{{day|select_date}}</option>
+<option value="{{day.num}}" {{day.selected|safe}}>{{day.num}}</option>
 {% endfor %}
 </select>
 </td>
@@ -39,28 +39,28 @@
 <td><label>開始時刻</label></td>
 <td><select id="note_start_y" name="note_start_y">
 {% for year in date_year %}
-<option value="{{year|select_date}}" {{year|is_selected}}>{{year|select_date}}</option>
+<option value="{{year.num}}" {{year.selected|safe}}>{{year.num}}</option>
 {% endfor %}
 </select>
 <select id="note_start_m" name="note_start_m">
 {% for month in date_month %}
-<option value="{{month|select_date}}" {{month|is_selected}}>{{month|select_date}}</option>
+<option value="{{month.num}}" {{month.selected|safe}}>{{month.num}}</option>
 {% endfor %}
 </select>
 <select id="note_start_d" name="note_start_d">
 {% for day in date_day %}
-<option value="{{day|select_date}}"{{day|is_selected}}>{{day|select_date}}</option>
+<option value="{{day.num}}"{{day.selected|safe}}>{{day.num}}</option>
 {% endfor %}
 </select>
 &mdash;
 <select id="note_start_h" name="note_start_h">
 {% for hour in date_hour %}
-<option value="{{hour|select_date}}"{{hour|is_selected}}>{{hour|select_date}}</option>
+<option value="{{hour.num}}"{{hour.selected|safe}}>{{hour.num}}</option>
 {% endfor %}
 </select>
 <select id="note_start_mi" name="note_start_mi">
 {% for min in date_min %}
-<option value="{{min|select_date}}" {{min|is_selected}}>{{min|select_date}}</option>
+<option value="{{min.num}}" {{min.selected|safe}}>{{min.num}}</option>
 {% endfor %}
 </select>
 </td>
@@ -70,28 +70,28 @@
 <td><label>終了時刻</label></td>
 <td><select id="note_end_y" name="note_end_y">
 {% for year in date_year %}
-<option value="{{year|select_date}}"{{year|is_selected}}>{{year|select_date}}</option>
+<option value="{{year.num}}"{{year.selected|safe}}>{{year.num}}</option>
 {% endfor %}
 </select>
 <select id="note_end_m" name="note_end_m">
 {% for month in date_month %}
-<option value="{{month|select_date}}"{{month|is_selected}}>{{month|select_date}}</option>
+<option value="{{month.num}}"{{month.selected|safe}}>{{month.num}}</option>
 {% endfor %}
 </select>
 <select id="note_end_d" name="note_end_d">
 {% for day in date_day %}
-<option value="{{day|select_date}}"{{day|is_selected}}>{{day|select_date}}</option>
+<option value="{{day.num}}"{{day.selected|safe}}>{{day.num}}</option>
 {% endfor %}
 </select>
 &mdash;
 <select id="note_end_h" name="note_end_h">
 {% for hour in date_hour %}
-<option value="{{hour|select_date}}"{{hour|is_selected}}>{{hour|select_date}}</option>
+<option value="{{hour.num}}"{{hour.selected|safe}}>{{hour.num}}</option>
 {% endfor %}
 </select>
 <select id="note_end_mi" name="note_end_mi">
 {% for min in date_min %}
-<option value="{{min|select_date}}"{{min|is_selected}}>{{min|select_date}}</option>
+<option value="{{min.num}}"{{min.selected|safe}}>{{min.num}}</option>
 {% endfor %}
 </select>
 </td>

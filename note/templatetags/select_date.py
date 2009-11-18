@@ -6,17 +6,6 @@ from django import template
 register = template.Library()
 
 @register.filter
-def select_date(value):
-    return value[0]
-
-@register.filter
-def is_selected(value):
-    html = ''
-    if value[1]:
-        html = 'selected="selected"'
-    return html
-
-@register.filter
 def form_elapsed_time(value):
     min = value % 60
     hour = value / 60

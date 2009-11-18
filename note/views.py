@@ -233,7 +233,7 @@ def note_create(request):
                 note.tag.add(tag_obj) 
             note.save()
         
-        add_feed(note)
+        #add_feed(note)
         t = loader.get_template('note/note.html')
         c = RequestContext(request,{
             'theuser':note.user,
@@ -346,15 +346,22 @@ def tag(request,tag_name):
     return HttpResponse(t.render(c))
 
 
+## option タグに渡す値と選択されてるかどうかのフラグ
+class DateOption(object):
+    def __init__(self,num,selected):
+        self.num = num
+        self.selected = selected
+
 ## ノート作成用（日付など）の関数
 def create_select_year(now):
     now_year = now.year
     years_num = 11
     years = []
     for i in xrange(years_num):
-        years.append([now_year - 5 + i, False])
-        if years[i][0] == now_year:
-            years[i][1] = True
+        #years.append([now_year - 5 + i, False])
+        years.append(DateOption(now_year - 5 + i,''))
+        if years[i].num == now_year:
+            years[i].selected = 'selected="selected"'
     return years
 
 def create_select_month(now):
@@ -363,9 +370,10 @@ def create_select_month(now):
     month_num = 12
     months = []
     for i in xrange(month_num):
-        months.append([i+1, False])
-        if months[i][0] == now_month:
-            months[i][1] = True
+        #months.append([i+1, False])
+        months.append(DateOption(i+1,''))
+        if months[i].num == now_month:
+            months[i].selected = 'selected'
     return months
 
 def create_select_day(now):
@@ -373,9 +381,10 @@ def create_select_day(now):
     day_num = 31
     days = []
     for i in xrange(day_num):
-        days.append([i+1, False])
-        if days[i][0] == now_day:
-            days[i][1] = True
+        #days.append([i+1, False])
+        days.append(DateOption(i+1,False))
+        if days[i].num == now_day:
+            days[i].selected = 'selected'
     return days
 
 def create_select_hour(now):
@@ -383,9 +392,10 @@ def create_select_hour(now):
     hour_num = 24
     hours = []
     for i in xrange(hour_num):
-        hours.append([i, False])
-        if hours[i][0] == now_hour:
-            hours[i][1] = True
+        #hours.append([i, False])
+        hours.append(DateOption(i,False))
+        if hours[i].num == now_hour:
+            hours[i].selected = 'selected'
     return hours
 
 def create_select_min(now):
@@ -396,30 +406,12 @@ def create_select_min(now):
     select_min = 0
     count = 0
     for i in xrange(0,min_num,5):
-        mins.append([i, False])
+        #mins.append([i, False])
+        mins.append(DateOption(i,''))
         if fabs(i-now_min) < smallest:
             smallest = fabs(i-now_min)
             select_min = count
         count += 1
-    mins[select_min][1] = True
+    mins[select_min].selected = 'selected'
     return mins
 
-from django.utils import feedgenerator
-from django.shortcuts import render_to_response
-
-def add_feed(note):
-    f = feedgenerator.Atom1Feed(
-        title=u"卒研ノート",
-        link=u"http://127.0.0.0/note",
-        description=u"説明",
-        language=u"ja")
-    #global f
-    #feedにitemを追加
-    #note = Note.objects..order_by('-date')[:1]
-    f.add_item(
-        title = note.title,
-        link = u'http://127.0.0.0/note/',
-        description = u'test')
-    return render_to_response('feed.xml', {'feed':f.writeString('utf-8')})
-    #print f.writeString('utf-8')
-    #f.write('feed.xml','utf-8')

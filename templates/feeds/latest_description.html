@@ -1,1 +1,2 @@
-{{obj.content}}
+{% load truncate_row %}
+{{obj.content|truncate_row|safe}}
