@@ -196,7 +196,7 @@ def note_create(request):
         user_id = request.POST['note_user_id']
         title = request.POST['note_title']
         content = request.POST['note_content']
-        locate = int(request.POST['note_locate'])
+        locate = request.POST['note_locate']
         date_y = int(request.POST['note_date_y'])
         date_m = int(request.POST['note_date_m'])
         date_d = int(request.POST['note_date_d'])
@@ -232,7 +232,8 @@ def note_create(request):
                     tag_obj = tag_list[0]
                 note.tag.add(tag_obj) 
             note.save()
-         
+        
+        add_feed(note)
         t = loader.get_template('note/note.html')
         c = RequestContext(request,{
             'theuser':note.user,
@@ -240,6 +241,7 @@ def note_create(request):
             })
         return HttpResponse(t.render(c))
 
+@login_required
 def note_edit(request,note_id):
     note = Note.objects.get(pk=note_id)
     now = note.date
@@ -271,6 +273,7 @@ def note_edit(request,note_id):
         })
     return HttpResponse(t.render(c))
 
+@login_required
 def note_update(request,note_id):
     note = Note.objects.get(pk=note_id)
     user_id = request.POST['note_user_id']
@@ -322,7 +325,7 @@ def note_update(request,note_id):
     return HttpResponseRedirect('/note/user/%s/%d/%d/%d' %
             (note.user.username,note.date.year,note.date.month,note.id))
 
-def note(request,user_nick,year,month,note_id):
+def note(request,user_nick,note_id):
     user = User.objects.get(username=user_nick)
     note = Note.objects.get(pk=note_id)
     t = loader.get_template('note/note.html')
@@ -400,3 +403,23 @@ def create_select_min(now):
         count += 1
     mins[select_min][1] = True
     return mins
+
+from django.utils import feedgenerator
+from django.shortcuts import render_to_response
+
+def add_feed(note):
+    f = feedgenerator.Atom1Feed(
+        title=u"卒研ノート",
+        link=u"http://127.0.0.0/note",
+        description=u"説明",
+        language=u"ja")
+    #global f
+    #feedにitemを追加
+    #note = Note.objects..order_by('-date')[:1]
+    f.add_item(
+        title = note.title,
+        link = u'http://127.0.0.0/note/',
+        description = u'test')
+    return render_to_response('feed.xml', {'feed':f.writeString('utf-8')})
+    #print f.writeString('utf-8')
+    #f.write('feed.xml','utf-8')

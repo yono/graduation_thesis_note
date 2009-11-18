@@ -1,4 +1,4 @@
 syntax: glob
 *.pyc
 note/*.pyc
-.DS_STORE
+.DS_Store

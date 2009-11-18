@@ -58,6 +58,9 @@ class Note(models.Model):
             tags.append(tag.name)
         return ', '.join(tags)
 
+    def get_absolute_url(self):
+        return "http://127.0.0.1:8000/note/user/%s/%d" % (self.user.username,self.id)
+
 class Comment(models.Model):
     name = models.CharField(max_length=200)
     content = models.TextField()

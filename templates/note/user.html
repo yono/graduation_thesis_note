@@ -50,7 +50,7 @@ value='{{belong.start.year}}'>{{belong.grade}}/{{belong.start.year}}</option>
     {% for note in notes %}
     <tr>
         <td>{{note.date}}</td>
-        <td><a href="/note/user/{{theuser.username}}/{{note.date.year}}/{{note.date.month}}/{{note.id}}">{{note.title}}</a></td>
+        <td><a href="/note/user/{{theuser.username}}/{{note.id}}">{{note.title}}</a></td>
         <td>{{note.start}}</td>
         <td>{{note.end}}</td>
         <td>{{note.elapsed_time|form_elapsed_time}}</td>
