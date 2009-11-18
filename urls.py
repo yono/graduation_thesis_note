@@ -32,6 +32,9 @@ urlpatterns = patterns('',
     # ノート編集
     (r'^note/note_edit/(?P<note_id>\d+)/$','graduate.note.views.note_edit'),
     (r'^note/note_update/(?P<note_id>\d+)/$','graduate.note.views.note_update'),
+    # ノート削除
+    (r'^note/note_delete/(?P<note_id>\d+)/$','graduate.note.views.note_delete'),
+    (r'^note/note_destroy/(?P<note_id>\d+)/$','graduate.note.views.note_destroy'),
 
     # mixiで言うところのホーム
     (r'^note/home/$','graduate.note.views.home'),

@@ -4,7 +4,9 @@
 {{note.title}}
 {% endblock title %}
 {% block content %}
-<h1>詳細表示</h1>
+<h1>ノートを削除してもよろしいですか？</h1>
+<a href='/note/note_destroy/{{note.id}}/'>はい</a>　
+<a href='/note/user/{{theuser.username}}/'>いいえ</a>
 {% if note %}
 <p>{{theuser.username}}</p>
 <table border="1" cellspacing="0" width="750px">
@@ -47,13 +49,4 @@
 </table>
 <br>
 {% endif %}
-{% ifequal user.username note.user.username %}
-<a href='/note/note_edit/{{note.id}}/'>編集</a>|
-{% endifequal %}
-<a
-    href='/note/user/{{theuser.username}}/'>{{theuser.fullname}}のノート一覧</a>
-{% ifequal user.username note.user.username %}
-|
-<a href='/note/note_delete/{{note.id}}/'>削除</a>
-{% endifequal %}
 {% endblock content %}

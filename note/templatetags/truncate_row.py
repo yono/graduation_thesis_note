@@ -11,5 +11,4 @@ def truncate_row(value):
     if len(rows) > 10:
         result = rows[:10]
         result.append(u'<br />.....（省略されました）<br />')
-    print len(result)
     return '\n'.join(result)

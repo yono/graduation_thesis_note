@@ -325,6 +325,24 @@ def note_update(request,note_id):
     return HttpResponseRedirect('/note/user/%s/%d/%d/%d' %
             (note.user.username,note.date.year,note.date.month,note.id))
 
+@login_required
+def note_delete(request,note_id):
+    note = Note.objects.get(pk=note_id)
+    t = loader.get_template('note/note_delete.html')
+    c = RequestContext(request,{
+        'theuser':user,
+        'note':note,
+        })
+    return HttpResponse(t.render(c))
+
+@login_required
+def note_destroy(request,note_id):
+    note = Note.objects.get(pk=note_id)
+    user = User.objects.get(pk=note.user.id)
+    note.delete()
+
+    return HttpResponseRedirect('/note/user/%s/' % (user.username))
+
 def note(request,user_nick,note_id):
     user = User.objects.get(username=user_nick)
     note = Note.objects.get(pk=note_id)

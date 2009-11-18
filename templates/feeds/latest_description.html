@@ -1,2 +1,5 @@
 {% load truncate_row %}
+{% load select_date %}
+氏名:{{obj.user.fullname}} 作業時間: {{obj.elapsed_time|form_elapsed_time}}
+<br />
 {{obj.content|truncate_row|safe}}
