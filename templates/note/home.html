@@ -25,17 +25,30 @@ value='{{belong.start.year}}'>{{belong.grade}}/{{belong.start.year}}</option>
 {% endif %}
 <table border="1" cellspacing="0">
     <tr>
-        <th>日付</th><th>タイトル</th><th>開始時刻</th><th>終了時刻</th><th>時
+        <th>日付</th><th>タイトル</th>
+        {% ifequal theuser.id user.id %}
+        <th>編集</th>
+        {% endifequal %}
+        <th>開始時刻</th><th>終了時刻</th><th>時
             間</th><th>場所</th>
+        {% ifequal theuser.id user.id %}
+        <th>削除</th>
+        {% endifequal %}
     </tr>
     {% for note in notes %}
     <tr>
         <td>{{note.date}}</td>
         <td><a href="/note/user/{{theuser.username}}/{{note.date.year}}/{{note.date.month}}/{{note.id}}">{{note.title}}</a></td>
+        {% ifequal theuser.id user.id %}
+        <td><a href="/note/note_edit/{{note.id}}/">編集</a></td>
+        {% endifequal %}
         <td>{{note.start}}</td>
         <td>{{note.end}}</td>
         <td>{{note.elapsed_time|form_elapsed_time}}</td>
         <td>{{note.locate}}</td>
+        {% ifequal theuser.id user.id %}
+        <td><a href="/note/note_delete/{{note.id}}/">削除</a></td>
+        {% endifequal %}
     </tr>
     {% endfor %}
 </table>
