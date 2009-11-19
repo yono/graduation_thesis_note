@@ -1,0 +1,24 @@
+{% extends "note/base.html" %}
+{% load select_date %}
+{% block rss %}
+<link rel="alternate" type="application/rss+xml"
+href="/note/rss/user/{{theuser.username}}/" title="{{theuser.fullname}}のRSS">
+{% endblock rss %}
+{% block title %}
+{{theuser.fullname}}のユーザー情報
+{% endblock title %}
+{% block content %}
+<h1>{{theuser.fullname}}のユーザー情報</h1>
+<ul>
+    <li>氏名: {{theuser.fullname}}</li>
+    <li>履歴:
+    <ul>
+        {% for belong in belongs %}
+        <li>{{belong.grade.formalname}}: {{belong.start}} - {{belong.end}}</li>
+        {% endfor %}
+    </ul>
+    </li>
+</ul>
+<a
+    href='/note/user/{{theuser.username}}/'>{{theuser.fullname}}のノート一覧</a>
+{% endblock content %}

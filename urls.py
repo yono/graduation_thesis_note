@@ -22,6 +22,9 @@ urlpatterns = patterns('',
     # ユーザのノート一覧
     (r'^note/user/(?P<user_nick>\w+)/$','graduate.note.views.user'),
 
+    # ユーザ情報
+    (r'^note/user_info/(?P<user_nick>\w+)/$','graduate.note.views.user_info'),
+
     # ノート詳細
     (r'^note/user/(?P<user_nick>\w+)/(?P<note_id>\d+)/$','graduate.note.views.note'),
 

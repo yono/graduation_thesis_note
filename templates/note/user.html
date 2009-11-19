@@ -13,6 +13,7 @@ href="/note/rss/user/{{theuser.username}}/" title="{{theuser.fullname}}のRSS">
 <h1>{% if year %}{{year}}年度 {% endif %}
     {% if month %}{{month}}月 {% endif %}
     {{theuser.fullname}} のノート一覧</h1>
+<a href='/note/user_info/{{theuser.username}}/'>ユーザー情報</a>
 {% ifequal user.username theuser.username %}
 <p><a href="/note/note_new?user={{theuser.id}}">新規作成</a></p>
 {% endifequal %}

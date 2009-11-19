@@ -125,6 +125,17 @@ def get_note_month(notes):
         dates.append(NoteDate(date[0],date[1]))
     return dates
 
+def user_info(request,user_nick):
+    user = User.objects.get(username=user_nick)
+    belongs = Belong.objects.filter(user=user).order_by('-start')
+    t = loader.get_template('note/user_info.html')
+    c = RequestContext(request,{
+        'theuser':user,
+        'belongs':belongs,
+        })
+    return HttpResponse(t.render(c))
+    
+
 def user(request,user_nick):
     user = User.objects.get(username=user_nick)
 
