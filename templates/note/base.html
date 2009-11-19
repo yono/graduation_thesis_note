@@ -2,6 +2,10 @@
     <head>
         <title>NAL研卒業研究ノート::{% block title %}{%endblock title%}</title>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        <link rel="alternate" type="application/rss+xml"
+        href="/note/rss/latest">
+        {% block rss %}
+        {% endblock rss %}
         <link rel="stylesheet" href="/site_media/css/scaffold.css" />
     </head>
     <body>

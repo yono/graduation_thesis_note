@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from django.conf.urls.defaults import *
-from graduate.note.feeds import LatestNoteFeed
+from graduate.note.feeds import LatestNoteFeed,UserNoteFeed
 
 # Uncomment the next two lines to enable the admin:
 from django.contrib import admin
@@ -8,6 +8,7 @@ admin.autodiscover()
 
 feeds = {
     'latest': LatestNoteFeed,
+    'user':UserNoteFeed,
 }
 
 urlpatterns = patterns('',

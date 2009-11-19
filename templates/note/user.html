@@ -1,5 +1,9 @@
 {% extends "note/base.html" %}
 {% load select_date %}
+{% block rss %}
+<link rel="alternate" type="application/rss+xml"
+href="/note/rss/user/{{theuser.username}}/" title="{{theuser.fullname}}のRSS">
+{% endblock rss %}
 {% block title %}
 {% if year %}{{year}}年度 {% endif %}
 {% if month %}{{month}}月 {% endif %}

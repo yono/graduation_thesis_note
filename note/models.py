@@ -19,7 +19,10 @@ class User(AuthUser):
         return self.username
 
     def fullname(self):
-        return '%s%s' %  (self.last_name,self.first_name)
+        return u'%s%s' %  (self.last_name,self.first_name)
+
+    def get_absolute_url(self):
+        return "http://127.0.0.1:8000/note/user/%s/" % (self.username)
 
 class Belong(models.Model):
     user = models.ForeignKey(User)
