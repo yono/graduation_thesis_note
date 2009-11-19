@@ -80,12 +80,12 @@ value="{{note.id}}" />
 {% endif %}
 
 {% ifequal user.username note.user.username %}
-<a href='/note/note_edit/{{note.id}}/'>編集</a>|
+<a href='/note/note_edit?note_id={{note.id}}'>編集</a>|
 {% endifequal %}
 <a
     href='/note/user/{{theuser.username}}/'>{{theuser.fullname}}のノート一覧</a>
 {% ifequal user.username note.user.username %}
 |
-<a href='/note/note_delete/{{note.id}}/'>削除</a>
+<a href='/note/note_delete?note_id={{note.id}}'>削除</a>
 {% endifequal %}
 {% endblock content %}

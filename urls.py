@@ -21,10 +21,8 @@ urlpatterns = patterns('',
     (r'^note/$','graduate.note.views.index'),
     # ユーザのノート一覧
     (r'^note/user/(?P<user_nick>\w+)/$','graduate.note.views.user'),
-    # ユーザの年度別のノート一覧
-    #(r'^note/user/(?P<user_nick>\w+)/(?P<year>\d+)/$','graduate.note.views.user_year'),
 
-    # ユーザのノート詳細
+    # ノート詳細
     (r'^note/user/(?P<user_nick>\w+)/(?P<note_id>\d+)/$','graduate.note.views.note'),
 
     # ノート作成
@@ -32,11 +30,11 @@ urlpatterns = patterns('',
     (r'^note/note_create/$','graduate.note.views.note_create'),
 
     # ノート編集
-    (r'^note/note_edit/(?P<note_id>\d+)/$','graduate.note.views.note_edit'),
-    (r'^note/note_update/(?P<note_id>\d+)/$','graduate.note.views.note_update'),
+    (r'^note/note_edit/$','graduate.note.views.note_edit'),
+    (r'^note/note_update/$','graduate.note.views.note_update'),
     # ノート削除
-    (r'^note/note_delete/(?P<note_id>\d+)/$','graduate.note.views.note_delete'),
-    (r'^note/note_destroy/(?P<note_id>\d+)/$','graduate.note.views.note_destroy'),
+    (r'^note/note_delete/$','graduate.note.views.note_delete'),
+    (r'^note/note_destroy/$','graduate.note.views.note_destroy'),
 
     # コメント
     (r'^note/post_comment/$','graduate.note.views.post_comment'),
@@ -44,8 +42,11 @@ urlpatterns = patterns('',
     # mixiで言うところのホーム
     (r'^note/home/$','graduate.note.views.home'),
 
+    # タグ一覧
+    (r'^note/tag/$','graduate.note.views.tag'),
+
     # タグ
-    (r'^note/tag/(?P<tag_name>\w+)/$','graduate.note.views.tag'),
+    (r'^note/tag/(?P<tag_name>\w+)/$','graduate.note.views.tag_detail'),
 
     # ユーザ認証
     (r'^note/auth/login/$','django.contrib.auth.views.login',{'template_name':'note/login.html'}),

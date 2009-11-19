@@ -1,29 +1,11 @@
 {% extends "note/base.html" %}
 {% load select_date %}
 {% block title %}
-[{{tag.name}}]タグの付いたノート一覧
+タグ一覧
 {% endblock title %}
 {% block content %}
-<h1>[{{tag.name}}]タグの付いたノート一覧</h1>
-{% if notes %}
-<table border="1" cellspacing="0">
-    <tr>
-        <th>氏名</th><th>日付</th><th>タイトル</th><th>開始時刻</th><th>終了時刻</th><th>時
-            間</th><th>場所</th>
-    </tr>
-    {% for note in notes %}
-    <tr>
-        <td>{{note.user.fullname}}</td>
-        <td>{{note.date}}</td>
-        <td><a href="/note/user/{{note.user.username}}/{{note.id}}">{{note.title}}</a></td>
-        <td>{{note.start}}</td>
-        <td>{{note.end}}</td>
-        <td>{{note.elapsed_time|form_elapsed_time}}</td>
-        <td>{{note.locate}}</td>
-    </tr>
-    {% endfor %}
-</table>
-{% else %}
-<p> No notes are avaliable. </p>
-{% endif %}
+<h1>タグ一覧</h1>
+{% for tag in tags %}
+<a href='/note/tag/{{tag.tag}}/' class='{{tag.cssclass}}'>{{tag.tag}}</a>&nbsp;
+{% endfor %}
 {% endblock content %}

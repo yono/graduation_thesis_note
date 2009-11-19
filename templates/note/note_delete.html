@@ -5,7 +5,7 @@
 {% endblock title %}
 {% block content %}
 <h1>ノートを削除してもよろしいですか？</h1>
-<a href='/note/note_destroy/{{note.id}}/'>はい</a>　
+<a href='/note/note_destroy?note_id={{note.id}}'>はい</a>　
 <a href='/note/user/{{theuser.username}}/'>いいえ</a>
 {% if note %}
 <p>{{theuser.username}}</p>

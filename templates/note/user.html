@@ -63,22 +63,22 @@ value='{{belong.start.year}}'>{{belong.grade}}/{{belong.start.year}}</option>
         <td>{{note.date}}</td>
         <td><a href="/note/user/{{theuser.username}}/{{note.id}}">{{note.title}}</a></td>
         {% ifequal theuser.id user.id %}
-        <td><a href="/note/note_edit/{{note.id}}/">編集</a></td>
+        <td><a href="/note/note_edit?note_id={{note.id}}">編集</a></td>
         {% endifequal %}
         <td>{{note.start}}</td>
         <td>{{note.end}}</td>
         <td>{{note.elapsed_time|form_elapsed_time}}</td>
         <td>{{note.locate}}</td>
         {% ifequal theuser.id user.id %}
-        <td><a href="/note/note_delete/{{note.id}}/">削除</a></td>
+        <td><a href="/note/note_delete?note_id={{note.id}}">削除</a></td>
         {% endifequal %}
     </tr>
     {% endfor %}
 </table>
 <div><h1>合計時間: {{totaltime|form_elapsed_time}}</h1></div>
-<a
-    href='/note/user/{{theuser.username}}/'>{{theuser.fullname}}のノート一覧</a>
 {% else %}
 <p> No notes are avaliable. </p>
 {% endif %}
+<a
+    href='/note/user/{{theuser.username}}/'>{{theuser.fullname}}のノート一覧</a>
 {% endblock content %}

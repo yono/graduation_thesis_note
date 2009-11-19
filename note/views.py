@@ -241,7 +241,8 @@ def note_create(request):
         return HttpResponse(t.render(c))
 
 @login_required
-def note_edit(request,note_id):
+def note_edit(request):
+    note_id = request.GET['note_id']
     note = Note.objects.get(pk=note_id)
     now = note.date
     start = note.start
@@ -275,7 +276,8 @@ def note_edit(request,note_id):
     return HttpResponse(t.render(c))
 
 @login_required
-def note_update(request,note_id):
+def note_update(request):
+    note_id = request.POST['note_id']
     note = Note.objects.get(pk=note_id)
     user_id = request.POST['note_user_id']
     title = request.POST['note_title']
@@ -324,11 +326,12 @@ def note_update(request,note_id):
             note.tag.add(tag_obj) 
         note.save()
     
-    return HttpResponseRedirect('/note/user/%s/%d/%d/%d' %
-            (note.user.username,note.date.year,note.date.month,note.id))
+    return HttpResponseRedirect('/note/user/%s/%d' %
+            (note.user.username,note.id))
 
 @login_required
-def note_delete(request,note_id):
+def note_delete(request):
+    note_id = request.GET['note_id']
     note = Note.objects.get(pk=note_id)
     t = loader.get_template('note/note_delete.html')
     c = RequestContext(request,{
@@ -338,7 +341,8 @@ def note_delete(request,note_id):
     return HttpResponse(t.render(c))
 
 @login_required
-def note_destroy(request,note_id):
+def note_destroy(request):
+    note_id = request.GET['note_id']
     note = Note.objects.get(pk=note_id)
     user = User.objects.get(pk=note.user.id)
     note.delete()
@@ -373,10 +377,19 @@ def note(request,user_nick,note_id):
         })
     return HttpResponse(t.render(c))
 
-def tag(request,tag_name):
+def tag(request):
+    notes = Note.objects.all()
+    tags = make_tagcloud(notes)
+    t = loader.get_template('note/tag.html')
+    c = RequestContext(request,{
+        'tags':tags,
+        })
+    return HttpResponse(t.render(c))
+
+def tag_detail(request,tag_name):
     tag = Tag.objects.get(name=tag_name)
     notes = tag.note_set.all()
-    t = loader.get_template('note/tag.html')
+    t = loader.get_template('note/tag_detail.html')
     c = RequestContext(request,{
         'tag':tag,
         'notes':notes,

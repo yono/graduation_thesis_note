@@ -7,8 +7,12 @@
 <h1>ノート編集</h1>
 <p>{{note.user.username}} の研究ノートを編集する</p>
 
-<form action='/note/note_update/{{note.id}}/' method="post">
+<form action='/note/note_update/' method="post">
 <table>
+<tr>
+    <td>Note_id</td>
+    <td>{{note.id}}<input id="note_id" name="note_id" type="hidden" value="{{note.id}}" /></td>
+</tr>
 <tr>
     <td>User_id</td>
     <td>{{note.user.id}}<input id="note_user_id" name="note_user_id" type="hidden"
