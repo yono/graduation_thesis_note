@@ -11,7 +11,7 @@ href="/note/rss/user/{{theuser.username}}/" title="{{theuser.fullname}}のRSS">
 <h1>{{theuser.fullname}}のユーザー情報</h1>
 <ul>
     <li>氏名: {{theuser.fullname}}</li>
-    <li>履歴:
+    <li>ノート履歴:
     <ul>
         {% for belong in belongs %}
         <li>{{belong.grade.formalname}}: {{belong.start}} - {{belong.end}}</li>
