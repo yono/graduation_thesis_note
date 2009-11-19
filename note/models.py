@@ -71,6 +71,9 @@ class Comment(models.Model):
     def __unicode__(self):
         return self.name
 
+    def get_absolute_url(self):
+        return "http://127.0.0.1:8000/note/%s/%d" % (self.note.user.username,self.note.id)
+
 from django.contrib import admin
 admin.site.register(Note)
 admin.site.register(Belong)

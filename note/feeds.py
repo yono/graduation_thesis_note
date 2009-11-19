@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding:utf-8 -*-
 from django.contrib.syndication.feeds import Feed
-from graduate.note.models import Note,User
+from graduate.note.models import Note,User,Comment
 
 class LatestNoteFeed(Feed):
     title = u"NAL研卒業研究ノート"
@@ -31,3 +31,20 @@ class UserNoteFeed(Feed):
 
     def items(self,obj):
         return Note.objects.filter(user=obj).order_by("-id")[:5]
+
+class CommentFeed(Feed):
+    title = u"NAL研卒業研究ノート: コメントRSS"
+    link = "http://127.0.0.0:8000/note/"
+    description = u"NAL研卒業研究ノート"
+
+    #def get_object(self,bits):
+    #    return Comment.objects.order_by("-id")[:1]
+
+    def items(self):
+        return Comment.objects.order_by("-id")[:5]
+
+    #def title(self, obj):
+    #    return obj[0].name
+
+    #def description(self, obj):
+    #    return obj[0].content
