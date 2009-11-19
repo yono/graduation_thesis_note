@@ -1,10 +1,16 @@
 {% extends "note/base.html" %}
 {% load select_date %}
 {% block title %}
-[{{tag.name}}]タグの付いたノート一覧
+{% for keyword in keywords %}
+{{keyword}}  
+{% endfor %}
+の検索結果
 {% endblock title %}
 {% block content %}
-<h1>[{{tag.name}}]タグの付いたノート一覧</h1>
+<h1>{% for keyword in keywords %}
+ {{keyword}} 
+{% endfor %}
+の検索結果</h1>
 {% if notes %}
 <table border="1" cellspacing="0">
     <tr>

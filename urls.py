@@ -52,6 +52,9 @@ urlpatterns = patterns('',
     #RSS
     (r'^note/rss/(?P<url>.*)/$','django.contrib.syndication.views.feed',{'feed_dict':feeds}),
 
+    #検索
+    (r'^note/search/$','graduate.note.views.search'),
+
     # CSS
     (r'^site_media/(?P<path>.+)$','django.views.static.serve',{'document_root':'/Users/yono/hg/django/graduate/templates'}),
 )

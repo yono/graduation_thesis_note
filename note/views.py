@@ -51,7 +51,6 @@ def index(request):
         belongs = user.belong_set.all()
         for belong in belongs:
             years[belong.start.year] = 0
-            #grades[belong.grade.name] = 0
 
     year_list = []
     for year in years:
@@ -384,6 +383,27 @@ def tag(request,tag_name):
         })
     return HttpResponse(t.render(c))
 
+def search(request):
+    from django.db.models.query import Q
+    keywords = request.GET['keywords']
+    exc = []
+    fil_c = []
+    fil_t = []
+    for keyword in keywords.split():
+        if keyword.startswith('-'):
+            exc.append(Q(content__icontains=keyword[1:]))
+            exc.append(Q(title__icontains=keyword[1:]))
+        else:
+            fil_c.append(Q(content__icontains=keyword))
+            fil_t.append(Q(title__icontains=keyword))
+    notes = Note.objects.filter(*fil_t) | Note.objects.filter(*fil_c)
+    notes = notes.exclude(*exc)
+    t = loader.get_template('note/search.html')
+    c = RequestContext(request,{
+        'notes':notes,
+        'keywords':keywords.split(),
+        })
+    return HttpResponse(t.render(c))
 
 ## option タグに渡す値と選択されてるかどうかのフラグ
 class DateOption(object):
