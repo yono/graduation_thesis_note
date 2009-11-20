@@ -225,7 +225,7 @@ def note_create(request):
         end = datetime(end_y,end_m,end_d,end_h,end_mi)
         elapsed_time = end - start
         elapsed_min = (elapsed_time.seconds)/60
-        content = content.replace('\n','<br />')
+        #content = content.replace('\n','<br />')
         note = Note(title=title,content=content,locate=locate,date=date,
                 start=start,end=end,elapsed_time=elapsed_min,user_id=user_id)
         note.save()
@@ -259,7 +259,7 @@ def note_edit(request):
     start = note.start
     end = note.end
 
-    note.content = note.content.replace('<br />','\n')
+    #note.content = note.content.replace('<br />','\n')
 
     elapsed_hour = note.elapsed_time / 60
     elapsed_min  = note.elapsed_time % 60
@@ -312,7 +312,7 @@ def note_update(request):
     end_mi = int(request.POST['note_end_mi'])
     end = datetime(end_y,end_m,end_d,end_h,end_mi)
     elapsed_min = int(request.POST['hour']*60) + int(request.POST['min'])
-    content = content.replace('\n','<br />')
+    #content = content.replace('\n','<br />')
     note.title = title
     note.content = content
     note.locate = locate
@@ -399,7 +399,7 @@ def tag(request):
 
 def tag_detail(request,tag_name):
     tag = Tag.objects.get(name=tag_name)
-    notes = tag.note_set.all()
+    notes = tag.note_set.all().order_by('-date')
     t = loader.get_template('note/tag_detail.html')
     c = RequestContext(request,{
         'tag':tag,
@@ -421,7 +421,7 @@ def search(request):
             fil_c.append(Q(content__icontains=keyword))
             fil_t.append(Q(title__icontains=keyword))
     notes = Note.objects.filter(*fil_t) | Note.objects.filter(*fil_c)
-    notes = notes.exclude(*exc)
+    notes = notes.exclude(*exc).order_by('-date')
     t = loader.get_template('note/search.html')
     c = RequestContext(request,{
         'notes':notes,

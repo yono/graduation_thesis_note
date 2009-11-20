@@ -17,3 +17,7 @@ def taglist(value):
     for tag in value.all():
         tags.append("<a href='/note/tag/%s/'>%s</a>" % (tag.name,tag.name))
     return ', '.join(tags)
+
+@register.filter
+def add_br(value):
+    return value.replace('\n','<br />')

@@ -34,7 +34,7 @@ class Belong(models.Model):
         return '%s-%s' % (self.grade.name,self.user.username)
 
 class Tag(models.Model):
-    name = models.CharField(max_length=100,unique=True)
+    name = models.CharField(max_length=255,unique=True)
 
     def __unicode__(self):
         return self.name
@@ -49,6 +49,7 @@ class Note(models.Model):
     elapsed_time = models.IntegerField()
     user = models.ForeignKey(User)
     tag = models.ManyToManyField(Tag)
+    text_type = models.IntegerField()
 
     def __unicode__(self):
         return self.title
@@ -63,7 +64,7 @@ class Note(models.Model):
         return "http://127.0.0.1:8000/note/user/%s/%d" % (self.user.username,self.id)
 
 class Comment(models.Model):
-    name = models.CharField(max_length=200)
+    name = models.CharField(max_length=100)
     content = models.TextField()
     note = models.ForeignKey(Note)
     posted_date = models.DateTimeField()
