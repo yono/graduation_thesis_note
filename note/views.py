@@ -7,6 +7,7 @@ from graduate.note.models import User,Note,Belong,Tag,Grade,Comment
 from django.http import HttpResponse, HttpResponseRedirect
 from datetime import datetime,time,timedelta
 from math import fabs
+from django.db import connection
 
 class TagCloud(object):
     def __init__(self,tag,cssclass):
@@ -16,8 +17,14 @@ class TagCloud(object):
 def make_tagcloud(notes=[]):
     css_classes = ['nube1','nube2','nube3','nube4','nube5']
     tags = {}
-    #if len(notes) == 0:
-    #    notes = Note.objects.all()
+    if len(notes) == 0:
+        cursor = connection.cursor()
+        cursor.execute('''
+        select t.name,count(tg.id) from note_tag t,note_note_tag tg
+        where t.id = tg.tag_id group by tg.tag_id
+        ''')
+        rows = cursor.fetchall()
+        tags = dict(rows)
     for note in notes:
         for tag in note.tag.all():
             tags[tag.name] = tags.get(tag.name, 0) + 1
@@ -77,8 +84,7 @@ def index(request):
             yearcolumn.append(UserTableCell('users','',users))
         user_table.append(yearcolumn)
 
-    notes = Note.objects.all()
-    tags = make_tagcloud(notes)
+    tags = make_tagcloud()
     
     t = loader.get_template('note/index.html')
     c = RequestContext(request,{
@@ -124,7 +130,6 @@ def get_note_month(notes):
         dates_t[(year,month)] = 0
     
     dates_t = dates_t.keys()
-    #dates_t.sort(cmp=lambda x,y:cmp(x[0]+x[1], y[0]+y[1]),reverse=True)
     dates_t.sort(compare_year_month,reverse=True)
     
     dates = []
@@ -232,9 +237,11 @@ def note_create(request):
         end = datetime(end_y,end_m,end_d,end_h,end_mi)
         elapsed_time = end - start
         elapsed_min = (elapsed_time.seconds)/60
-        #content = content.replace('\n','<br />')
+        ### TODO: text_type に対応する
+        text_type = 1
         note = Note(title=title,content=content,locate=locate,date=date,
-                start=start,end=end,elapsed_time=elapsed_min,user_id=user_id)
+                start=start,end=end,elapsed_time=elapsed_min,user_id=user_id,
+                text_type=text_type)
         note.save()
 
         if request.POST['note_tag_list'] != '':
@@ -250,7 +257,6 @@ def note_create(request):
                 note.tag.add(tag_obj) 
             note.save()
         
-        #add_feed(note)
         t = loader.get_template('note/note.html')
         c = RequestContext(request,{
             'theuser':note.user,
@@ -265,8 +271,6 @@ def note_edit(request):
     now = note.date
     start = note.start
     end = note.end
-
-    #note.content = note.content.replace('<br />','\n')
 
     elapsed_hour = note.elapsed_time / 60
     elapsed_min  = note.elapsed_time % 60
@@ -319,14 +323,12 @@ def note_update(request):
     end_mi = int(request.POST['note_end_mi'])
     end = datetime(end_y,end_m,end_d,end_h,end_mi)
     elapsed_min = int(request.POST['hour']*60) + int(request.POST['min'])
-    #content = content.replace('\n','<br />')
     note.title = title
     note.content = content
     note.locate = locate
     note.date = date
     note.start = start
     note.end = end
-    print elapsed_min
     note.elapsed_time = elapsed_min
     note.save()
 
@@ -448,7 +450,6 @@ def create_select_year(now):
     years_num = 11
     years = []
     for i in xrange(years_num):
-        #years.append([now_year - 5 + i, False])
         years.append(DateOption(now_year - 5 + i,''))
         if years[i].num == now_year:
             years[i].selected = 'selected="selected"'
@@ -460,7 +461,6 @@ def create_select_month(now):
     month_num = 12
     months = []
     for i in xrange(month_num):
-        #months.append([i+1, False])
         months.append(DateOption(i+1,''))
         if months[i].num == now_month:
             months[i].selected = 'selected'
@@ -471,7 +471,6 @@ def create_select_day(now):
     day_num = 31
     days = []
     for i in xrange(day_num):
-        #days.append([i+1, False])
         days.append(DateOption(i+1,False))
         if days[i].num == now_day:
             days[i].selected = 'selected'
@@ -482,7 +481,6 @@ def create_select_hour(now):
     hour_num = 24
     hours = []
     for i in xrange(hour_num):
-        #hours.append([i, False])
         hours.append(DateOption(i,False))
         if hours[i].num == now_hour:
             hours[i].selected = 'selected'
@@ -496,7 +494,6 @@ def create_select_min(now):
     select_min = 0
     count = 0
     for i in xrange(0,min_num,5):
-        #mins.append([i, False])
         mins.append(DateOption(i,''))
         if fabs(i-now_min) < smallest:
             smallest = fabs(i-now_min)
