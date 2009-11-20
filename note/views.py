@@ -110,6 +110,12 @@ class NoteDate(object):
         self.year  = year
         self.month = month
 
+def compare_year_month(x,y):
+    if cmp(x[0],y[0]) != 0:
+        return cmp(x[0],y[0])
+    else:
+        return cmp(x[1],y[1])
+
 def get_note_month(notes):
     dates_t = {}
     for note in notes:
@@ -118,7 +124,8 @@ def get_note_month(notes):
         dates_t[(year,month)] = 0
     
     dates_t = dates_t.keys()
-    dates_t.sort(cmp=lambda x,y:cmp(x[0]+x[1], y[0]+y[1]),reverse=True)
+    #dates_t.sort(cmp=lambda x,y:cmp(x[0]+x[1], y[0]+y[1]),reverse=True)
+    dates_t.sort(compare_year_month,reverse=True)
     
     dates = []
     for date in dates_t:
