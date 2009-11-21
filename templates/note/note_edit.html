@@ -8,7 +8,7 @@
 <p>{{note.user.username}} の研究ノートを編集する</p>
 
 <form action='/note/note_update/' method="post">
-<table>
+<table id='edit'>
 <tr>
     <td>Note_id</td>
     <td>{{note.id}}<input id="note_id" name="note_id" type="hidden" value="{{note.id}}" /></td>
@@ -107,6 +107,15 @@
     <input id="hour" name="hour" size="5" type="text"
     value="{{elapsed_hour}}" />時間<input
     id="min" name="min" size="5" type="text" value="{{elapsed_min}}" />分
+</td>
+</tr>
+
+<tr>
+<td><label>テキストタイプ</label></td>
+<td><input type="radio" name="note_text_type" value="1" 
+    {% ifequal note.text_type 1 %}checked{% endifequal %}>HTML
+    <input type="radio" name="note_text_type" value="2"
+    {% ifequal note.text_type 2 %}checked{% endifequal %}>Wiki
 </td>
 </tr>
     

@@ -8,6 +8,8 @@ from django.http import HttpResponse, HttpResponseRedirect
 from datetime import datetime,time,timedelta
 from math import fabs
 from django.db import connection
+import creole2html
+import creole
 
 class TagCloud(object):
     def __init__(self,tag,cssclass):
@@ -97,7 +99,7 @@ def index(request):
 @login_required
 def home(request):
     user = User.objects.get(username=request.user)
-    notes = Note.objects.filter(user=user.id).order_by('-date')
+    notes = Note.objects.filter(user=user.id).order_by('-date').order_by('-start')
     tags = make_tagcloud(notes)
     totaltime = sum([note.elapsed_time for note in notes])
     belongs = Belong.objects.filter(user=user)
@@ -150,7 +152,6 @@ def user_info(request,user_nick):
 
 def user(request,user_nick):
     user = User.objects.get(username=user_nick)
-
     
     resultdict = {}
     dates = []
@@ -164,13 +165,13 @@ def user(request,user_nick):
         resultdict['year'] = year
         resultdict['month'] = month
         belong = Belong.objects.get(user=user,start__year=year)
-        notes = Note.objects.filter(user__username=user_nick,date__gt=belong.start,date__lt=belong.end,date__month=month).order_by('-date')
+        notes = Note.objects.filter(user__username=user_nick,date__gt=belong.start,date__lt=belong.end,date__month=month).order_by('-date').order_by('-start')
         notes_all = Note.objects.filter(user=user.id).order_by('-date')
         dates = get_note_month(notes_all)
     elif 'year' in request.GET:
         resultdict['year'] = request.GET['year']
         belong = Belong.objects.get(user=user,start__year=request.GET['year'])
-        notes = Note.objects.filter(user__username=user_nick,date__gt=belong.start,date__lt=belong.end).order_by('-date')
+        notes = Note.objects.filter(user__username=user_nick,date__gt=belong.start,date__lt=belong.end).order_by('-date').order_by('-start')
         notes_all = Note.objects.filter(user=user.id).order_by('-date')
         dates = get_note_month(notes_all)
     else:
@@ -237,8 +238,7 @@ def note_create(request):
         end = datetime(end_y,end_m,end_d,end_h,end_mi)
         elapsed_time = end - start
         elapsed_min = (elapsed_time.seconds)/60
-        ### TODO: text_type に対応する
-        text_type = 1
+        text_type = int(request.POST['note_text_type'])
         note = Note(title=title,content=content,locate=locate,date=date,
                 start=start,end=end,elapsed_time=elapsed_min,user_id=user_id,
                 text_type=text_type)
@@ -257,12 +257,8 @@ def note_create(request):
                 note.tag.add(tag_obj) 
             note.save()
         
-        t = loader.get_template('note/note.html')
-        c = RequestContext(request,{
-            'theuser':note.user,
-            'note':note,
-            })
-        return HttpResponse(t.render(c))
+        return HttpResponseRedirect('/note/user/%s/%d/' % 
+                (note.user.username,note.id))
 
 @login_required
 def note_edit(request):
@@ -304,7 +300,6 @@ def note_update(request):
     user_id = request.POST['note_user_id']
     title = request.POST['note_title']
     content = request.POST['note_content']
-    content = content.replace('\n','<br />')
     locate = int(request.POST['note_locate'])
     date_y = int(request.POST['note_date_y'])
     date_m = int(request.POST['note_date_m'])
@@ -323,6 +318,7 @@ def note_update(request):
     end_mi = int(request.POST['note_end_mi'])
     end = datetime(end_y,end_m,end_d,end_h,end_mi)
     elapsed_min = int(request.POST['hour']*60) + int(request.POST['min'])
+    text_type = int(request.POST['note_text_type'])
     note.title = title
     note.content = content
     note.locate = locate
@@ -330,6 +326,7 @@ def note_update(request):
     note.start = start
     note.end = end
     note.elapsed_time = elapsed_min
+    note.text_type = text_type
     note.save()
 
     note.tag.clear()
@@ -346,7 +343,7 @@ def note_update(request):
             note.tag.add(tag_obj) 
         note.save()
     
-    return HttpResponseRedirect('/note/user/%s/%d' %
+    return HttpResponseRedirect('/note/user/%s/%d/' %
             (note.user.username,note.id))
 
 @login_required
@@ -388,6 +385,12 @@ def post_comment(request):
 def note(request,user_nick,note_id):
     user = User.objects.get(username=user_nick)
     note = Note.objects.get(pk=note_id)
+    ## wiki形式の場合
+    if note.text_type == 2:
+        p = creole.Parser(note.content)
+        note.content = creole2html.HtmlEmitter(p.parse()).emit()
+    else:
+        note.content = note.content.replace('\n','<br />')
     comments = Comment.objects.filter(note=note)
     t = loader.get_template('note/note.html')
     c = RequestContext(request,{
