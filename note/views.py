@@ -11,14 +11,18 @@ from django.db import connection
 import creole2html
 import creole
 
+# タグクラウドを実現
 class TagCloud(object):
     def __init__(self,tag,cssclass):
         self.tag = tag
         self.cssclass = cssclass
 
+# タグクラウドを生成
 def make_tagcloud(notes=[]):
     css_classes = ['nube1','nube2','nube3','nube4','nube5']
     tags = {}
+
+    # O/Rマッパーを使わずSQLを直接実行して処理を高速化
     if len(notes) == 0:
         cursor = connection.cursor()
         cursor.execute('''
@@ -27,10 +31,13 @@ def make_tagcloud(notes=[]):
         ''')
         rows = cursor.fetchall()
         tags = dict(rows)
+
+    # タグの出現回数を数える
     for note in notes:
         for tag in note.tag.all():
             tags[tag.name] = tags.get(tag.name, 0) + 1
 
+    # タグの出現回数に応じてフォントの大きさを決定
     fontmax = -1000
     fontmin = 1000
     for tag_num in tags.values():
@@ -44,11 +51,12 @@ def make_tagcloud(notes=[]):
         result.append(TagCloud(tag,css_classes[(num-fontmin)/divisor]))
     return result
 
+# index のユーザー一覧表の各セルを表現
 class UserTableCell(object):
     def __init__(self,category,content,users=[]):
-        self.category = category
-        self.content = content
-        self.users = users
+        self.category = category # belong or year or user
+        self.content = content # belong or year で使う
+        self.users = users # user で使う。ユーザーリスト
 
 def index(request):
     user_list = User.objects.all()
@@ -66,13 +74,13 @@ def index(request):
         year_list.append(year)
     year_list.sort(reverse=True)
 
-    user_table = []
+    user_table = [] # ユーザー一覧表
     belong_list = [UserTableCell('belong','年度')]
     for grade in grades:
         belong_list.append(UserTableCell('belong',grade.formalname))
     user_table.append(belong_list)
 
-    for year in year_list:
+    for year in year_list: # 年度ごとに配列にまとめる
         oneyear_list = Belong.objects.filter(start__year=year)
         yearcolumn = [UserTableCell('year',year)]
         for grade_list in belong_list:
@@ -113,17 +121,20 @@ def home(request):
         })
     return HttpResponse(t.render(c))
 
+# Template に渡す用のクラス
 class NoteDate(object):
     def __init__(self,year,month):
         self.year  = year
         self.month = month
 
+# 年と月をソートする際の比較
 def compare_year_month(x,y):
     if cmp(x[0],y[0]) != 0:
         return cmp(x[0],y[0])
     else:
         return cmp(x[1],y[1])
 
+# ノートが存在する年と月をリスト化
 def get_note_month(notes):
     dates_t = {}
     for note in notes:
@@ -148,32 +159,45 @@ def user_info(request,user_nick):
         'belongs':belongs,
         })
     return HttpResponse(t.render(c))
-    
 
+"""
+ユーザーごとのノートをリスト表示
+年度ごとの表示
+年/月ごとの表示
+全てのノートの表示
+に対応
+"""
 def user(request,user_nick):
     user = User.objects.get(username=user_nick)
     
     resultdict = {}
     dates = []
-    if ('year' in request.GET and 'month' in request.GET) or 'year-month' in request.GET:
+    if ('year' in request.GET and 'month' in request.GET) or\
+            'year-month' in request.GET:
         if ('year' in request.GET):
             year = request.GET['year']
             month = request.GET['month']
         else:
             year,month = request.GET['year-month'].split('-')
 
-        resultdict['year'] = year
-        resultdict['month'] = month
+        print year,month
+        resultdict = {'year':year,'month':month}
         belong = Belong.objects.get(user=user,start__year=year)
-        notes = Note.objects.filter(user__username=user_nick,date__gt=belong.start,date__lt=belong.end,date__month=month).order_by('-date').order_by('-start')
-        notes_all = Note.objects.filter(user=user.id).order_by('-date')
-        dates = get_note_month(notes_all)
+        notes = Note.objects.filter(user__username=user_nick,
+                date__gt=belong.start,date__lt=belong.end,
+                date__month=month).order_by('-date').order_by('-start')
+        notes_year = Note.objects.filter(user__username=user_nick,
+                date__gt=belong.start,
+                date__lt=belong.end).order_by('-date').order_by('-start')
+        dates = get_note_month(notes_year)
     elif 'year' in request.GET:
-        resultdict['year'] = request.GET['year']
-        belong = Belong.objects.get(user=user,start__year=request.GET['year'])
-        notes = Note.objects.filter(user__username=user_nick,date__gt=belong.start,date__lt=belong.end).order_by('-date').order_by('-start')
-        notes_all = Note.objects.filter(user=user.id).order_by('-date')
-        dates = get_note_month(notes_all)
+        year = request.GET['year']
+        resultdict['year'] = year
+        belong = Belong.objects.get(user=user,start__year=year)
+        notes = Note.objects.filter(user__username=user_nick,
+                date__gt=belong.start,
+                date__lt=belong.end).order_by('-date').order_by('-start')
+        dates = get_note_month(notes)
     else:
         notes = Note.objects.filter(user=user.id).order_by('-date')
 
@@ -209,12 +233,12 @@ def note_new(request):
             })
         return HttpResponse(t.render(c))
     else:
-        return index(request)
+        return HttpResponseRedirect('/note/')
 
 @login_required
 def note_create(request):
     if 'note_user_id' not in request.POST:
-        return note_new(request) 
+        return HttpResponseRedirect('/note/note_new/')
     else:
         user_id = request.POST['note_user_id']
         title = request.POST['note_title']
@@ -244,6 +268,7 @@ def note_create(request):
                 text_type=text_type)
         note.save()
 
+        # タグを登録
         if request.POST['note_tag_list'] != '':
             tags = request.POST['note_tag_list'].split(',')
             for tag in tags:
@@ -257,8 +282,7 @@ def note_create(request):
                 note.tag.add(tag_obj) 
             note.save()
         
-        return HttpResponseRedirect('/note/user/%s/%d/' % 
-                (note.user.username,note.id))
+        return HttpResponseRedirect('/note/note_detail/%d/' % (note.id))
 
 @login_required
 def note_edit(request):
@@ -343,8 +367,7 @@ def note_update(request):
             note.tag.add(tag_obj) 
         note.save()
     
-    return HttpResponseRedirect('/note/user/%s/%d/' %
-            (note.user.username,note.id))
+    return HttpResponseRedirect('/note/note_detail/%d/' % (note.id))
 
 @login_required
 def note_delete(request):
@@ -374,16 +397,15 @@ def post_comment(request):
         user = note.user
         name = request.POST['comment_name']
         content = request.POST['comment_content']
-        content = content.replace('\n','<br />')
         posted_date = datetime.now()
-        comment = Comment(note=note,name=name,content=content,posted_date=posted_date)
+        comment = Comment(note=note,name=name,content=content,
+                            posted_date=posted_date)
         comment.save()
-        return HttpResponseRedirect('/note/user/%s/%d/' % (user.username,note_id))
+        return HttpResponseRedirect('/note/note_detail/%d/' % (note_id))
     else:
         return HttpResponseRedirect('/note/')
 
 def note(request,note_id):
-    #user = User.objects.get(username=user_nick)
     note = Note.objects.get(pk=note_id)
     user = note.user
     ## wiki形式の場合
@@ -420,10 +442,11 @@ def tag_detail(request,tag_name):
         })
     return HttpResponse(t.render(c))
 
+# 関連語による検索結果を表現
 class RelatedNote(object):
     def __init__(self,note,org_words):
         self.note = note
-        self.org_words = org_words
+        self.org_words = org_words # 基になった単語
 
 def search(request):
     ## 通常の検索
@@ -447,27 +470,26 @@ def search(request):
     m = metadata.MetaData()
     related_notes = {}
     related_note_set = set({})
-    for keyword in keywords.split():
+    for keyword in keywords.split(): # 複数語での検索に対応
         tmp_related_note_set = {}
-        if not keyword.startswith('-'):
+        if not keyword.startswith('-'): # NOT 検索は無視
             related_words = m.search(keyword)
-            for related_word in related_words:
+            for related_word in related_words: # 基になった語をまとめる
                 if int(related_word[0]) in related_notes:
-                    related_notes[int(related_word[0])].append(related_word[1])
+                    related_notes[int(related_word[0])][related_word[1]] = 0
                 else:
-                    related_notes[int(related_word[0])] = [related_word[1]]
-
+                    related_notes[int(related_word[0])] = {related_word[1]:0}
+            
+            # set を使ってAND演算を行う
             for i in related_notes:
                 tmp_related_note_set[i] = i
-            tmp_related_note_set = set(tmp_related_note_set)
+            tmp_set = set(tmp_related_note_set)
             if len(related_note_set) == 0:
-                related_note_set = related_note_set.union(tmp_related_note_set)
-                print 'first'
-                print tmp_related_note_set
-                print related_note_set
+                related_note_set = related_note_set.union(tmp_set)
             else:
-                related_note_set = related_note_set.intersection(tmp_related_note_set)
+                related_note_set = related_note_set.intersection(tmp_set)
 
+    # 通常の検索でヒットしたページは無視
     related_notes_list = []
     for i in related_note_set:
         flag = True
@@ -477,8 +499,9 @@ def search(request):
                 flag = False
                 break
         if flag == True:
-            related_notes_list.append(RelatedNote(note,','.join(related_notes[i])))
-
+            org_word_list = [k for k in related_notes[i].keys()]
+            org_words = ','.join(org_word_list)
+            related_notes_list.append(RelatedNote(note,org_words))
 
     t = loader.get_template('note/search.html')
     c = RequestContext(request,{
