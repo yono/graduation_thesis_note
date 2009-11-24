@@ -458,8 +458,14 @@ def search(request):
 
     related_notes_list = []
     for i in related_notes:
+        flag = True
         note = Note.objects.get(pk=i)
-        related_notes_list.append(RelatedNote(note,related_notes[i]))
+        for n in notes:
+            if n.id == i:
+                flag = False
+                break
+        if flag == True:
+            related_notes_list.append(RelatedNote(note,related_notes[i]))
 
     t = loader.get_template('note/search.html')
     c = RequestContext(request,{
