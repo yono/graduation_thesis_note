@@ -455,7 +455,7 @@ def search(request):
                 if int(related_word[0]) in related_notes:
                     related_notes[int(related_word[0])].append(related_word[1])
                 else:
-                    related_notes[int(related_word[0])] = {related_word[1]]
+                    related_notes[int(related_word[0])] = [related_word[1]]
 
             for i in related_notes:
                 tmp_related_note_set[i] = i
