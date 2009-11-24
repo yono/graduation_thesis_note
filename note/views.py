@@ -382,9 +382,10 @@ def post_comment(request):
     else:
         return HttpResponseRedirect('/note/')
 
-def note(request,user_nick,note_id):
-    user = User.objects.get(username=user_nick)
+def note(request,note_id):
+    #user = User.objects.get(username=user_nick)
     note = Note.objects.get(pk=note_id)
+    user = note.user
     ## wiki形式の場合
     if note.text_type == 2:
         p = creole.Parser(note.content)
