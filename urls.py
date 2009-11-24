@@ -49,7 +49,7 @@ urlpatterns = patterns('',
     (r'^note/tag/$','graduate.note.views.tag'),
 
     # タグ
-    (r'^note/tag/(?P<tag_name>\w+)/$','graduate.note.views.tag_detail'),
+    (r'^note/tag/(?P<tag_name>.+?)/$','graduate.note.views.tag_detail'),
 
     # ユーザ認証
     (r'^note/auth/login/$','django.contrib.auth.views.login',{'template_name':'note/login.html'}),
