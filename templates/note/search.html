@@ -14,13 +14,32 @@
 {% if notes %}
 <table border="1" cellspacing="0">
     <tr>
-        <th>氏名</th><th>日付</th><th>タイトル</th>    
+        <th>氏名</th><th>日付</th><th>タイトル</th>
     </tr>
     {% for note in notes %}
     <tr>
         <td>{{note.user.fullname}}</td>
         <td>{{note.date}}</td>
         <td><a href="/note/note_detail/{{note.id}}">{{note.title}}</a></td>
+    </tr>
+    {% endfor %}
+</table>
+
+<h2>{% for keyword in keywords %}
+ {{keyword}} 
+ {% endfor %}
+ の関連語検索
+ </h2>
+<table border="1" cellspacing="0">
+    <tr>
+        <th>氏名</th><th>日付</th><th>タイトル</th><th>関連語</th>
+    </tr>
+    {% for related_note in related_notes %}
+    <tr>
+        <td>{{related_note.note.user.fullname}}</td>
+        <td>{{related_note.note.date}}</td>
+        <td><a href="/note/note_detail/{{related_note.note.id}}">{{related_note.note.title}}</a></td>
+        <td>{{related_note.org_words}}</td>
     </tr>
     {% endfor %}
 </table>

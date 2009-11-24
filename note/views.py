@@ -420,7 +420,13 @@ def tag_detail(request,tag_name):
         })
     return HttpResponse(t.render(c))
 
+class RelatedNote(object):
+    def __init__(self,note,org_words):
+        self.note = note
+        self.org_words = org_words
+
 def search(request):
+    ## 通常の検索
     from django.db.models.query import Q
     keywords = request.GET['keywords']
     exc = []
@@ -435,10 +441,31 @@ def search(request):
             fil_t.append(Q(title__icontains=keyword))
     notes = Note.objects.filter(*fil_t) | Note.objects.filter(*fil_c)
     notes = notes.exclude(*exc).order_by('-date')
+
+    ## 関連語検索
+    import metadata
+    m = metadata.MetaData()
+    related_words = m.search(keywords)
+    related_notes = {}
+    for related_word in related_words:
+        if int(related_word[0]) in related_notes:
+            related_notes[int(related_word[0])].append(related_word[1])
+        else:
+            related_notes[int(related_word[0])] = [related_word[1]]
+
+    for i in related_notes:
+        related_notes[i] = ','.join(related_notes[i])
+
+    related_notes_list = []
+    for i in related_notes:
+        note = Note.objects.get(pk=i)
+        related_notes_list.append(RelatedNote(note,related_notes[i]))
+
     t = loader.get_template('note/search.html')
     c = RequestContext(request,{
         'notes':notes,
         'keywords':keywords.split(),
+        'related_notes':related_notes_list,
         })
     return HttpResponse(t.render(c))
 
