@@ -8,18 +8,13 @@
 {% if notes %}
 <table border="1" cellspacing="0">
     <tr>
-        <th>氏名</th><th>日付</th><th>タイトル</th><th>開始時刻</th><th>終了時刻</th><th>時
-            間</th><th>場所</th>
+        <th>氏名</th><th>日付</th><th>タイトル</th> 
     </tr>
     {% for note in notes %}
     <tr>
         <td>{{note.user.fullname}}</td>
         <td>{{note.date}}</td>
         <td><a href="/note/user/{{note.user.username}}/{{note.id}}">{{note.title}}</a></td>
-        <td>{{note.start}}</td>
-        <td>{{note.end}}</td>
-        <td>{{note.elapsed_time|form_elapsed_time}}</td>
-        <td>{{note.locate}}</td>
     </tr>
     {% endfor %}
 </table>
