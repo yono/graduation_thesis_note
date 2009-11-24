@@ -445,19 +445,31 @@ def search(request):
     ## 関連語検索
     import metadata
     m = metadata.MetaData()
-    related_words = m.search(keywords)
     related_notes = {}
-    for related_word in related_words:
-        if int(related_word[0]) in related_notes:
-            related_notes[int(related_word[0])].append(related_word[1])
-        else:
-            related_notes[int(related_word[0])] = [related_word[1]]
+    related_note_set = set({})
+    for keyword in keywords.split():
+        tmp_related_note_set = {}
+        if not keyword.startswith('-'):
+            related_words = m.search(keyword)
+            for related_word in related_words:
+                if int(related_word[0]) in related_notes:
+                    related_notes[int(related_word[0])].append(related_word[1])
+                else:
+                    related_notes[int(related_word[0])] = {related_word[1]]
 
-    for i in related_notes:
-        related_notes[i] = ','.join(related_notes[i])
+            for i in related_notes:
+                tmp_related_note_set[i] = i
+            tmp_related_note_set = set(tmp_related_note_set)
+            if len(related_note_set) == 0:
+                related_note_set = related_note_set.union(tmp_related_note_set)
+                print 'first'
+                print tmp_related_note_set
+                print related_note_set
+            else:
+                related_note_set = related_note_set.intersection(tmp_related_note_set)
 
     related_notes_list = []
-    for i in related_notes:
+    for i in related_note_set:
         flag = True
         note = Note.objects.get(pk=i)
         for n in notes:
@@ -465,7 +477,8 @@ def search(request):
                 flag = False
                 break
         if flag == True:
-            related_notes_list.append(RelatedNote(note,related_notes[i]))
+            related_notes_list.append(RelatedNote(note,','.join(related_notes[i])))
+
 
     t = loader.get_template('note/search.html')
     c = RequestContext(request,{
