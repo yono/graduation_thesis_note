@@ -7,11 +7,16 @@
 の検索結果
 {% endblock title %}
 {% block content %}
+{% if notes %}
+
+<table border="0"><!-- テーブルを横に並べる -->
+    <tr><td valign='top'>
+
 <h1>{% for keyword in keywords %}
  {{keyword}} 
 {% endfor %}
 の検索結果</h1>
-{% if notes %}
+
 <table border="1" cellspacing="0">
     <tr>
         <th>氏名</th><th>日付</th><th>タイトル</th>
@@ -25,24 +30,31 @@
     {% endfor %}
 </table>
 
-<h2>{% for keyword in keywords %}
- {{keyword}} 
- {% endfor %}
- の関連語検索
- </h2>
+</td>
+
+<td valign='top'>
+    <h1>関連語検索</h1>
+
+{% for related_word in related_words %}
+<h2>[{{related_word.word}}]</h2>
 <table border="1" cellspacing="0">
     <tr>
-        <th>氏名</th><th>日付</th><th>タイトル</th><th>関連語</th>
+        <th>氏名</th><th>日付</th><th>タイトル</th>
     </tr>
-    {% for related_note in related_notes %}
+    {% for note in related_word.ids %}
     <tr>
-        <td>{{related_note.note.user.fullname}}</td>
-        <td>{{related_note.note.date}}</td>
-        <td><a href="/note/note_detail/{{related_note.note.id}}">{{related_note.note.title}}</a></td>
-        <td>{{related_note.org_words}}</td>
+        <td>{{note.user.fullname}}</td>
+        <td>{{note.date}}</td>
+        <td><a href="/note/note_detail/{{note.id}}">{{note.title}}</a></td>
     </tr>
     {% endfor %}
 </table>
+{% endfor %}
+
+</td>
+</tr>
+</table>
+
 {% else %}
 <p> No notes are avaliable. </p>
 {% endif %}

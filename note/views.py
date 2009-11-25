@@ -448,6 +448,12 @@ class RelatedNote(object):
         self.note = note
         self.org_words = org_words # 基になった単語
 
+# 関連語による検索結果を表現
+class RelatedWord(object):
+    def __init__(self,word,ids):
+        self.word = word
+        self.ids = ids
+
 def search(request):
     ## 通常の検索
     from django.db.models.query import Q
@@ -464,50 +470,62 @@ def search(request):
             fil_t.append(Q(title__icontains=keyword))
     notes = Note.objects.filter(*fil_t) | Note.objects.filter(*fil_c)
     notes = notes.exclude(*exc).order_by('-date')
+    exist_notes = dict([(note.id,0) for note in notes])
 
     ## 関連語検索
     import metadata
     m = metadata.MetaData()
     related_notes = {}
     related_note_set = set({})
-    for keyword in keywords.split(): # 複数語での検索に対応
+    for keyword in keywords.split(): # 複数語での検索に対応(NOT検索は無視)
         tmp_related_note_set = {}
-        if not keyword.startswith('-'): # NOT 検索は無視
-            related_words = m.search(keyword)
-            for related_word in related_words: # 基になった語をまとめる
+        related_words = m.search(keyword)
+        for related_word in related_words: # 基になった語をまとめる
+            if int(related_word[0]) not in exist_notes:
                 if int(related_word[0]) in related_notes:
                     related_notes[int(related_word[0])][related_word[1]] = 0
                 else:
                     related_notes[int(related_word[0])] = {related_word[1]:0}
             
-            # set を使ってAND演算を行う
-            for i in related_notes:
-                tmp_related_note_set[i] = i
-            tmp_set = set(tmp_related_note_set)
-            if len(related_note_set) == 0:
-                related_note_set = related_note_set.union(tmp_set)
-            else:
-                related_note_set = related_note_set.intersection(tmp_set)
+        # set を使ってAND演算を行う
+        for i in related_notes:
+            tmp_related_note_set[i] = i
+        tmp_set = set(tmp_related_note_set)
+        if len(related_note_set) == 0:
+            related_note_set = related_note_set.union(tmp_set)
+        else:
+            related_note_set = related_note_set.intersection(tmp_set)
 
     # 通常の検索でヒットしたページは無視
     related_notes_list = []
     for i in related_note_set:
-        flag = True
         note = Note.objects.get(pk=i)
-        for n in notes:
-            if n.id == i:
-                flag = False
-                break
-        if flag == True:
-            org_word_list = [k for k in related_notes[i].keys()]
-            org_words = ','.join(org_word_list)
-            related_notes_list.append(RelatedNote(note,org_words))
+        org_words = ','.join(related_notes[i].keys())
+        related_notes_list.append(RelatedNote(note,org_words))
+
+    # 基になった単語でまとめる
+    related_words_dict = {}
+    for i in related_note_set:
+        note = Note.objects.get(pk=i)
+        for word in related_notes[i].keys():
+            if word in related_words_dict:
+                related_words_dict[word].append(note)
+            else:
+                related_words_dict[word] = [note]
+    
+    related_words = []
+    for word in related_words_dict:
+        print word
+        related_words.append(RelatedWord(word,related_words_dict[word]))
+
+    related_words.sort(lambda x,y:cmp(len(x.ids),len(y.ids)),reverse=True)
 
     t = loader.get_template('note/search.html')
     c = RequestContext(request,{
         'notes':notes,
         'keywords':keywords.split(),
         'related_notes':related_notes_list,
+        'related_words':related_words,
         })
     return HttpResponse(t.render(c))
 
