@@ -52,6 +52,14 @@ a { color: #000; }
 a:visited { color: #666; }
 a:hover { color: #fff; background-color: #0c3; }
 
+a.rword{
+    font-size: large;
+}
+
+#rwords{
+    width: 400px;
+}
+
 .fieldWithErrors {
   padding: 2px;
   background-color: red;

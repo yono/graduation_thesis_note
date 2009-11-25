@@ -35,8 +35,16 @@
 <td valign='top'>
     <h1>関連語検索</h1>
 
+<div id='rwords'>
 {% for related_word in related_words %}
-<h2>[{{related_word.word}}]</h2>
+<nobr>
+[<a href='#rword_{{related_word.word}}'>{{related_word.word}}</a>]
+</nobr>
+{% endfor %}
+</div>
+
+{% for related_word in related_words %}
+<h2 id='rword_{{related_word.word}}'>[{{related_word.word}}]</h2>
 <table border="1" cellspacing="0">
     <tr>
         <th>氏名</th><th>日付</th><th>タイトル</th>
