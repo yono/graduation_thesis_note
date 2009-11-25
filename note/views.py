@@ -5,11 +5,14 @@ from django.contrib.auth import authenticate, login, logout
 from django.template import Context, loader, RequestContext
 from graduate.note.models import User,Note,Belong,Tag,Grade,Comment
 from django.http import HttpResponse, HttpResponseRedirect
+from django.db.models.query import Q
+from django.db import connection
 from datetime import datetime,time,timedelta
 from math import fabs
-from django.db import connection
+import re
 import creole2html
 import creole
+import metadata
 
 # タグクラウドを実現
 class TagCloud(object):
@@ -180,7 +183,6 @@ def user(request,user_nick):
         else:
             year,month = request.GET['year-month'].split('-')
 
-        print year,month
         resultdict = {'year':year,'month':month}
         belong = Belong.objects.get(user=user,start__year=year)
         notes = Note.objects.filter(user__username=user_nick,
@@ -390,7 +392,6 @@ def note_destroy(request):
     return HttpResponseRedirect('/note/user/%s/' % (user.username))
 
 def post_comment(request):
-    print request.POST
     if 'comment_note_id' in request.POST:
         note_id = int(request.POST['comment_note_id'])
         note = Note.objects.get(pk=note_id)
@@ -456,7 +457,6 @@ class RelatedWord(object):
 
 def search(request):
     ## 通常の検索
-    from django.db.models.query import Q
     keywords = request.GET['keywords']
     exc = []
     fil_c = []
@@ -473,7 +473,6 @@ def search(request):
     exist_notes = dict([(note.id,0) for note in notes])
 
     ## 関連語検索
-    import metadata
     m = metadata.MetaData()
     related_notes = {}
     related_note_set = set({})
@@ -515,7 +514,6 @@ def search(request):
     
     related_words = []
     for word in related_words_dict:
-        print word
         related_words.append(RelatedWord(word,related_words_dict[word]))
 
     related_words.sort(lambda x,y:cmp(len(x.ids),len(y.ids)),reverse=True)
