@@ -7,7 +7,6 @@
 の検索結果
 {% endblock title %}
 {% block content %}
-{% if notes %}
 
 <table border="0"><!-- テーブルを横に並べる -->
     <tr><td valign='top'>
@@ -17,6 +16,7 @@
 {% endfor %}
 の検索結果</h1>
 
+{% if notes %}
 <table border="1" cellspacing="0">
     <tr>
         <th>氏名</th><th>日付</th><th>タイトル</th>
@@ -29,12 +29,16 @@
     </tr>
     {% endfor %}
 </table>
+{% else %}
+<p> No notes are avaliable. </p>
+{% endif %}
 
 </td>
 
 <td valign='top'>
     <h1>関連語検索</h1>
 
+{% if related_words %}
 <div id='rwords'>
 {% for related_word in related_words %}
 <nobr>
@@ -59,11 +63,12 @@
 </table>
 {% endfor %}
 
+{% else %}
+<p> No notes are avaliable. </p>
+{% endif %}
+
 </td>
 </tr>
 </table>
 
-{% else %}
-<p> No notes are avaliable. </p>
-{% endif %}
 {% endblock content %}
