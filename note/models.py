@@ -50,6 +50,7 @@ class Note(models.Model):
     user = models.ForeignKey(User)
     tag = models.ManyToManyField(Tag)
     text_type = models.IntegerField()
+    has_metadata = models.BooleanField(default=False)
 
     def __unicode__(self):
         return self.title
