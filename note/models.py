@@ -75,7 +75,7 @@ class Comment(models.Model):
         return self.name
 
     def get_absolute_url(self):
-        return "%s/note_detail/%d/" % (url,self.note.user.username,self.note.id)
+        return "%s/note_detail/%d/" % (url,self.note.id)
 
 from django.contrib import admin
 admin.site.register(Note)
