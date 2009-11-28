@@ -6,6 +6,6 @@
 {% block content %}
 <h1>タグ一覧</h1>
 {% for tag in tags %}
-<a href='/note/tag/{{tag.tag}}/' class='{{tag.cssclass}}'>{{tag.tag}}</a>&nbsp;
+<a href='/note/tag/?tag={{tag.tag}}' class='{{tag.cssclass}}'>{{tag.tag}}</a>&nbsp;
 {% endfor %}
 {% endblock content %}

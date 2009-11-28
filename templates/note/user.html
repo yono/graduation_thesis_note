@@ -19,7 +19,7 @@ href="/note/rss/user/{{theuser.username}}/" title="{{theuser.fullname}}のRSS">
 {% endifequal %}
 <p>タグ一覧:
 {% for tag in tags %}
-<a href='/note/tag/{{tag.tag}}/' class='{{tag.cssclass}}'>{{tag.tag}}</a>&nbsp;
+<a href='/note/tag/?tag={{tag.tag}}' class='{{tag.cssclass}}'>{{tag.tag}}</a>&nbsp;
 {% endfor %}
 </p>
 

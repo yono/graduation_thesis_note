@@ -42,7 +42,7 @@
         <td><nobr>タグ</nobr></td>
         <td>
             {% for tag in note.tag.all %}
-            <a href="/note/tag/{{tag.name}}/">{{tag.name}}</a>
+            <a href="/note/tag/?tag={{tag.name}}">{{tag.name}}</a>
             {% endfor %}
         </td>
     </tr>

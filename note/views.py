@@ -426,22 +426,23 @@ def note(request,note_id):
 
 def tag(request):
     notes = Note.objects.all()
-    tags = make_tagcloud(notes)
-    t = loader.get_template('note/tag.html')
-    c = RequestContext(request,{
-        'tags':tags,
-        })
-    return HttpResponse(t.render(c))
-
-def tag_detail(request,tag_name):
-    tag = Tag.objects.get(name=tag_name)
-    notes = tag.note_set.all().order_by('-date')
-    t = loader.get_template('note/tag_detail.html')
-    c = RequestContext(request,{
-        'tag':tag,
-        'notes':notes,
-        })
-    return HttpResponse(t.render(c))
+    tag = ''
+    if 'tag' in request.GET:
+        tag = Tag.objects.get(name=request.GET['tag'])
+        notes = tag.note_set.all().order_by('-date')
+        t = loader.get_template('note/tag_detail.html')
+        c = RequestContext(request,{
+            'tag':tag,
+            'notes':notes,
+            })
+        return HttpResponse(t.render(c))
+    else:
+        tags = make_tagcloud(notes)
+        t = loader.get_template('note/tag.html')
+        c = RequestContext(request,{
+            'tags':tags,
+            })
+        return HttpResponse(t.render(c))
 
 # 関連語による検索結果を表現
 class RelatedNote(object):
