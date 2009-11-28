@@ -63,7 +63,7 @@ class Note(models.Model):
         return ', '.join(tags)
 
     def get_absolute_url(self):
-        return "%s/user/%s/%d" % (url,self.user.username,self.id)
+        return "%s/note_detail/%d/" % (url,self.user.username,self.id)
 
 class Comment(models.Model):
     name = models.CharField(max_length=100)
@@ -75,7 +75,7 @@ class Comment(models.Model):
         return self.name
 
     def get_absolute_url(self):
-        return "%s/%s/%d" % (url,self.note.user.username,self.note.id)
+        return "%s/note_detail/%d/" % (url,self.note.user.username,self.note.id)
 
 from django.contrib import admin
 admin.site.register(Note)
