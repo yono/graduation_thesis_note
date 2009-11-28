@@ -2,6 +2,7 @@ from django.db import models
 from django.contrib.auth.models import User as AuthUser, Group
 from django.contrib.auth import models as auth_models
 
+url = 'http://www.nal.ie.u-ryukyu.ac.jp/note'
 
 class Grade(models.Model):
     name = models.CharField(max_length=100)
@@ -22,7 +23,7 @@ class User(AuthUser):
         return u'%s%s' %  (self.last_name,self.first_name)
 
     def get_absolute_url(self):
-        return "http://127.0.0.1:8000/note/user/%s/" % (self.username)
+        return "%s/user/%s/" % (url,self.username)
 
 class Belong(models.Model):
     user = models.ForeignKey(User)
@@ -62,7 +63,7 @@ class Note(models.Model):
         return ', '.join(tags)
 
     def get_absolute_url(self):
-        return "http://127.0.0.1:8000/note/user/%s/%d" % (self.user.username,self.id)
+        return "%s/user/%s/%d" % (url,self.user.username,self.id)
 
 class Comment(models.Model):
     name = models.CharField(max_length=100)
@@ -74,7 +75,7 @@ class Comment(models.Model):
         return self.name
 
     def get_absolute_url(self):
-        return "http://127.0.0.1:8000/note/%s/%d" % (self.note.user.username,self.note.id)
+        return "%s/%s/%d" % (url,self.note.user.username,self.note.id)
 
 from django.contrib import admin
 admin.site.register(Note)

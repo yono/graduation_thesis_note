@@ -3,9 +3,11 @@
 from django.contrib.syndication.feeds import Feed
 from graduate.note.models import Note,User,Comment
 
+url = 'http://www.nal.ie.u-ryukyu.ac.jp/note/'
+
 class LatestNoteFeed(Feed):
     title = u"NAL研卒業研究ノート"
-    link = "http://127.0.0.0:8000/note/"
+    link = url
     description = u"NAL研卒業研究ノート"
 
     def items(self):
@@ -34,7 +36,7 @@ class UserNoteFeed(Feed):
 
 class CommentFeed(Feed):
     title = u"NAL研卒業研究ノート: コメントRSS"
-    link = "http://127.0.0.0:8000/note/"
+    link = url
     description = u"NAL研卒業研究ノート"
 
     #def get_object(self,bits):
