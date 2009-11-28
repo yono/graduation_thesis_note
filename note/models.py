@@ -63,7 +63,7 @@ class Note(models.Model):
         return ', '.join(tags)
 
     def get_absolute_url(self):
-        return "%s/note_detail/%d/" % (url,self.user.username,self.id)
+        return "%s/note_detail/%d/" % (url,self.id)
 
 class Comment(models.Model):
     name = models.CharField(max_length=100)
