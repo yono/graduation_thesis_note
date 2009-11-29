@@ -2,8 +2,9 @@
 # -*- coding:utf-8 -*-
 from django.contrib.syndication.feeds import Feed
 from graduate.note.models import Note,User,Comment
+import config
 
-url = 'http://www.nal.ie.u-ryukyu.ac.jp/note/'
+url = config.get_option('django','url')
 
 class LatestNoteFeed(Feed):
     title = u"NAL研卒業研究ノート"
