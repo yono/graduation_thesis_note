@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from django.conf.urls.defaults import *
 from graduate.note.feeds import LatestNoteFeed,UserNoteFeed,CommentFeed
+import config
 
 # Uncomment the next two lines to enable the admin:
 from django.contrib import admin
@@ -48,9 +49,6 @@ urlpatterns = patterns('',
     # タグ一覧
     (r'^note/tag/$','graduate.note.views.tag'),
 
-    # タグ
-    #(r'^note/tag/(?P<tag_name>.+?)/$','graduate.note.views.tag_detail'),
-
     # ユーザ認証
     (r'^note/auth/login/$','django.contrib.auth.views.login',{'template_name':'note/login.html'}),
     (r'^note/auth/logout/$','django.contrib.auth.views.logout',{'template_name':'note/logout.html'}),
@@ -62,5 +60,5 @@ urlpatterns = patterns('',
     (r'^note/search/$','graduate.note.views.search'),
 
     # CSS
-    (r'^site_media/(?P<path>.+)$','django.views.static.serve',{'document_root':'/Users/yono/hg/django/graduate/templates'}),
+    (r'^site_media/(?P<path>.+)$','django.views.static.serve',{'document_root':config.get_option('django','template_dir')}),
 )
