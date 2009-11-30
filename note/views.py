@@ -478,25 +478,26 @@ def search(request):
     related_notes = {}
     related_note_set = set({})
     for keyword in keywords.split(): # 複数語での検索に対応(NOT検索は無視)
-        tmp_related_note_set = {}
         related_words = m.search(keyword)
-        for related_word in related_words: # 基になった語をまとめる
-            if int(related_word[0]) not in exist_notes:
-                if int(related_word[0]) in related_notes:
-                    related_notes[int(related_word[0])][related_word[1]] = 0
+        tmp_related_notes = {}
+        for id,src_word in related_words: # 基になった語をまとめる
+            id = int(id)
+            # 通常の検索でヒットしたページは無視
+            if id not in exist_notes:
+                if id in related_notes:
+                    tmp_related_notes[id][src_word] = 0
+                    related_notes[id][src_word] = 0
                 else:
-                    related_notes[int(related_word[0])] = {related_word[1]:0}
+                    tmp_related_notes[id] = {src_word:0}
+                    related_notes[id] = {src_word:0}
             
         # set を使ってAND演算を行う
-        for i in related_notes:
-            tmp_related_note_set[i] = i
-        tmp_set = set(tmp_related_note_set)
+        tmp_set = set(tmp_related_notes)
         if len(related_note_set) == 0:
             related_note_set = related_note_set.union(tmp_set)
         else:
             related_note_set = related_note_set.intersection(tmp_set)
 
-    # 通常の検索でヒットしたページは無視
     related_notes_list = []
     for i in related_note_set:
         note = Note.objects.get(pk=i)
