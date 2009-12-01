@@ -262,8 +262,14 @@ def note_create(request):
         end_h = int(request.POST['note_end_h'])
         end_mi = int(request.POST['note_end_mi'])
         end = datetime(end_y,end_m,end_d,end_h,end_mi)
-        elapsed_time = end - start
-        elapsed_min = (elapsed_time.seconds)/60
+        hour = int(request.POST['hour'])
+        min = int(request.POST['min'])
+        ## 入力されてたらそのまま保存
+        if (hour > 0) or (min > 0):
+            elapsed_min = (hour * 60) + min
+        else:
+            elapsed_time = end - start
+            elapsed_min = (elapsed_time.seconds)/60
         text_type = int(request.POST['note_text_type'])
         note = Note(title=title,content=content,locate=locate,date=date,
                 start=start,end=end,elapsed_time=elapsed_min,user_id=user_id,
@@ -343,7 +349,7 @@ def note_update(request):
     end_h = int(request.POST['note_end_h'])
     end_mi = int(request.POST['note_end_mi'])
     end = datetime(end_y,end_m,end_d,end_h,end_mi)
-    elapsed_min = int(request.POST['hour']*60) + int(request.POST['min'])
+    elapsed_min = (int(request.POST['hour'])*60) + int(request.POST['min'])
     text_type = int(request.POST['note_text_type'])
     note.title = title
     note.content = content
