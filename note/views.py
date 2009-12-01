@@ -7,6 +7,7 @@ from graduate.note.models import User,Note,Belong,Tag,Grade,Comment
 from django.http import HttpResponse, HttpResponseRedirect
 from django.db.models.query import Q
 from django.db import connection
+from django.views.generic.simple import direct_to_template
 from datetime import datetime,time,timedelta
 from math import fabs
 import re
@@ -72,9 +73,7 @@ def index(request):
         for belong in belongs:
             years[belong.start.year] = 0
 
-    year_list = []
-    for year in years:
-        year_list.append(year)
+    year_list = years.keys()
     year_list.sort(reverse=True)
 
     user_table = [] # ユーザー一覧表
@@ -83,46 +82,38 @@ def index(request):
         belong_list.append(UserTableCell('belong',grade.formalname))
     user_table.append(belong_list)
 
-    for year in year_list: # 年度ごとに配列にまとめる
-        oneyear_list = Belong.objects.filter(start__year=year)
+    for year in year_list:
         yearcolumn = [UserTableCell('year',year)]
-        for grade_list in belong_list:
-            grade = grade_list.content
-            if grade == '年度':
-                continue
-            users = []
-            for belong in oneyear_list:
-                if belong.grade.formalname == grade:
-                    users.append(belong)
-            yearcolumn.append(UserTableCell('users','',users))
+        for i in xrange(1,len(belong_list)):
+            grade_name = belong_list[i].content
+            user_belongs = Belong.objects.filter(start__year=year,
+                                    grade__formalname=grade_name)
+            yearcolumn.append(UserTableCell('users','',user_belongs))
         user_table.append(yearcolumn)
 
     tags = make_tagcloud()
     
-    t = loader.get_template('note/index.html')
-    c = RequestContext(request,{
-        'user_table':user_table,
-        'tags':tags,
-        })
+    dictionary = {'user_table':user_table, 'tags':tags,}
 
-    return HttpResponse(t.render(c))
+    return direct_to_template(request,'note/index.html',dictionary)
 
 @login_required
 def home(request):
     user = User.objects.get(username=request.user)
-    notes = Note.objects.filter(user=user.id).order_by('-date').order_by('-start')
+    notes = Note.objects.filter(user=user.id).order_by('-date')
+    notes = notes.order_by('-start')
     tags = make_tagcloud(notes)
     totaltime = sum([note.elapsed_time for note in notes])
     belongs = Belong.objects.filter(user=user)
-    t = loader.get_template('note/home.html')
-    c = RequestContext(request,{
+    dictionary = {
         'theuser':user,
         'notes':notes,
         'tags':tags,
         'totaltime':totaltime,
         'belongs':belongs,
-        })
-    return HttpResponse(t.render(c))
+    }
+
+    return direct_to_template(request,'note/home.html',dictionary)
 
 # Template に渡す用のクラス
 class NoteDate(object):
@@ -156,12 +147,11 @@ def get_note_month(notes):
 def user_info(request,user_nick):
     user = User.objects.get(username=user_nick)
     belongs = Belong.objects.filter(user=user).order_by('-start')
-    t = loader.get_template('note/user_info.html')
-    c = RequestContext(request,{
+    dictionary = {
         'theuser':user,
         'belongs':belongs,
-        })
-    return HttpResponse(t.render(c))
+    }
+    return direct_to_template(request,'note/user_info.html',dictionary)
 
 """
 ユーザーごとのノートをリスト表示
@@ -207,33 +197,30 @@ def user(request,user_nick):
 
     belongs = Belong.objects.filter(user=user)
     totaltime = sum([note.elapsed_time for note in notes])
-    resultdict.update({
-            'theuser':user,
-            'notes':notes,
-            'tags':tags,
-            'totaltime':totaltime,
-            'dates':dates,
-            'belongs':belongs,
-            })
-    t = loader.get_template('note/user.html')
-    c = RequestContext(request,resultdict)
-    return HttpResponse(t.render(c))
+    dictionary = {
+        'theuser':user,
+        'notes':notes,
+        'tags':tags,
+        'totaltime':totaltime,
+        'dates':dates,
+        'belongs':belongs,
+    }
+    return direct_to_template(request,'note/user.html',dictionary)
 
 @login_required
 def note_new(request):
     if 'user' in request.GET:
         user = User.objects.get(pk=request.GET['user'])
         now = datetime.now()
-        t = loader.get_template('note/note_new.html')
-        c = RequestContext(request,{
+        dictionary = {
             'theuser':user,
             'date_year' :create_select_year(now),
             'date_month':create_select_month(now),
             'date_day'  :create_select_day(now),
             'date_hour' :create_select_hour(now),
             'date_min'  :create_select_min(now),
-            })
-        return HttpResponse(t.render(c))
+        }
+        return direct_to_template(request,'note/note_new.html',dictionary)
     else:
         return HttpResponseRedirect('/note/')
 
@@ -311,10 +298,8 @@ def note_edit(request):
     elapsed_hour = note.elapsed_time / 60
     elapsed_min  = note.elapsed_time % 60
 
-    t = loader.get_template('note/note_edit.html')
-    c = RequestContext(request,{
+    dictionary = {
         'note':note,
-        'theuser':user,
         'date_year'  :create_select_year(now),
         'date_month' :create_select_month(now),
         'date_day'   :create_select_day(now),
@@ -330,8 +315,8 @@ def note_edit(request):
         'end_min'    :create_select_min(end),
         'elapsed_hour':elapsed_hour,
         'elapsed_min':elapsed_min,
-        })
-    return HttpResponse(t.render(c))
+    }
+    return direct_to_template(request,'note/note_edit.html',dictionary)
 
 @login_required
 def note_update(request):
@@ -392,12 +377,8 @@ def note_update(request):
 def note_delete(request):
     note_id = request.GET['note_id']
     note = Note.objects.get(pk=note_id)
-    t = loader.get_template('note/note_delete.html')
-    c = RequestContext(request,{
-        'theuser':user,
-        'note':note,
-        })
-    return HttpResponse(t.render(c))
+    dictionary = {'note':note,}
+    return direct_to_template(request,'note/note_delete.html',dictionary)
 
 @login_required
 def note_destroy(request):
@@ -433,13 +414,8 @@ def note(request,note_id):
     else:
         note.content = note.content.replace('\n','<br />')
     comments = Comment.objects.filter(note=note)
-    t = loader.get_template('note/note.html')
-    c = RequestContext(request,{
-        'theuser':user,
-        'note':note,
-        'comments':comments,
-        })
-    return HttpResponse(t.render(c))
+    dictionary = {'theuser':user, 'note':note, 'comments':comments,}
+    return direct_to_template(request,'note/note.html',dictionary)
 
 def tag(request):
     notes = Note.objects.all()
@@ -447,19 +423,12 @@ def tag(request):
     if 'tag' in request.GET:
         tag = Tag.objects.get(name=request.GET['tag'])
         notes = tag.note_set.all().order_by('-date')
-        t = loader.get_template('note/tag_detail.html')
-        c = RequestContext(request,{
-            'tag':tag,
-            'notes':notes,
-            })
-        return HttpResponse(t.render(c))
+        dictionary = {'tag':tag, 'notes':notes,}
+        return direct_to_template(request,'note/tag_detail.html',dictionary)
     else:
         tags = make_tagcloud(notes)
-        t = loader.get_template('note/tag.html')
-        c = RequestContext(request,{
-            'tags':tags,
-            })
-        return HttpResponse(t.render(c))
+        dictionary = {'tags':tags,}
+        return direct_to_template(request,'note/tag.html',dictionary)
 
 # 関連語による検索結果を表現
 class RelatedNote(object):
@@ -515,12 +484,6 @@ def search(request):
         else:
             related_note_set = related_note_set.intersection(tmp_set)
 
-    related_notes_list = []
-    for i in related_note_set:
-        note = Note.objects.get(pk=i)
-        org_words = ','.join(related_notes[i].keys())
-        related_notes_list.append(RelatedNote(note,org_words))
-
     # 基になった単語でまとめる
     related_words_dict = {}
     for i in related_note_set:
@@ -531,20 +494,16 @@ def search(request):
             else:
                 related_words_dict[word] = [note]
     
-    related_words = []
-    for word in related_words_dict:
-        related_words.append(RelatedWord(word,related_words_dict[word]))
-
+    for word,value in related_words_dict.items():
+        related_words.append(RelatedWord(word,value))
     related_words.sort(lambda x,y:cmp(len(x.ids),len(y.ids)),reverse=True)
 
-    t = loader.get_template('note/search.html')
-    c = RequestContext(request,{
+    dictionary = {
         'notes':notes,
         'keywords':keywords.split(),
-        'related_notes':related_notes_list,
         'related_words':related_words,
-        })
-    return HttpResponse(t.render(c))
+    }
+    return direct_to_template(request,'note/search.html',dictionary)
 
 ## option タグに渡す値と選択されてるかどうかのフラグ
 class DateOption(object):
