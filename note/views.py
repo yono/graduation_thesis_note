@@ -237,6 +237,13 @@ def note_new(request):
     else:
         return HttpResponseRedirect('/note/')
 
+def check_time(ftime):
+    if ftime.isdigit():
+        time = int(ftime)
+    else:
+        time = 0
+    return time
+
 @login_required
 def note_create(request):
     if 'note_user_id' not in request.POST:
@@ -262,8 +269,9 @@ def note_create(request):
         end_h = int(request.POST['note_end_h'])
         end_mi = int(request.POST['note_end_mi'])
         end = datetime(end_y,end_m,end_d,end_h,end_mi)
-        hour = int(request.POST['hour'])
-        min = int(request.POST['min'])
+        ## 数字が入力されてるかチェック
+        hour = check_time(request.POST['hour'])
+        min = check_time(request.POST['min'])
         ## 入力されてたらそのまま保存
         if (hour > 0) or (min > 0):
             elapsed_min = (hour * 60) + min
@@ -349,7 +357,10 @@ def note_update(request):
     end_h = int(request.POST['note_end_h'])
     end_mi = int(request.POST['note_end_mi'])
     end = datetime(end_y,end_m,end_d,end_h,end_mi)
-    elapsed_min = (int(request.POST['hour'])*60) + int(request.POST['min'])
+    ## 数字が入力されてるかチェック
+    hour = check_time(request.POST['hour'])
+    min = check_time(request.POST['min'])
+    elapsed_min = (hour * 60) + min
     text_type = int(request.POST['note_text_type'])
     note.title = title
     note.content = content
