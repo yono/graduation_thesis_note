@@ -1,20 +1,17 @@
 # Create your views here.
 # -*- coding:utf-8 -*-
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth import authenticate, login, logout
-from django.template import Context, loader, RequestContext
 from graduate.note.models import User,Note,Belong,Tag,Grade,Comment,Metadata
-from django.http import HttpResponse, HttpResponseRedirect
+from django.http import HttpResponseRedirect
 from django.db.models.query import Q
 from django.db import connection
 from django.views.generic.simple import direct_to_template
-from datetime import datetime,time,timedelta
+from datetime import datetime
 from math import fabs
-import re
 import creole2html
 import creole
 
-# タグクラウドを実現
+# タグクラウドを表現
 class TagCloud(object):
     def __init__(self,tag,cssclass):
         self.tag = tag
@@ -25,7 +22,7 @@ def make_tagcloud(notes=[]):
     css_classes = ['nube1','nube2','nube3','nube4','nube5']
     tags = {}
 
-    # O/Rマッパーを使わずSQLを直接実行して処理を高速化
+    # O/Rマッパーを使わずSQLを直接実行
     if len(notes) == 0:
         cursor = connection.cursor()
         cursor.execute('''
@@ -81,6 +78,7 @@ def index(request):
         belong_list.append(UserTableCell('belong',grade.formalname))
     user_table.append(belong_list)
 
+    # 年度・所属ごとにユーザーを探す
     for year in year_list:
         yearcolumn = [UserTableCell('year',year)]
         for i in xrange(1,len(belong_list)):
@@ -104,6 +102,7 @@ def home(request):
     tags = make_tagcloud(notes)
     totaltime = sum([note.elapsed_time for note in notes])
     belongs = Belong.objects.filter(user=user)
+    
     dictionary = {
         'theuser':user,
         'notes':notes,
@@ -114,13 +113,13 @@ def home(request):
 
     return direct_to_template(request,'note/home.html',dictionary)
 
-# Template に渡す用のクラス
+# 年度と月の組を扱うクラス
 class NoteDate(object):
     def __init__(self,year,month):
         self.year  = year
         self.month = month
 
-# 年と月をソートする際の比較
+# 年と月をソートする際の比較関数
 def compare_year_month(x,y):
     if cmp(x[0],y[0]) != 0:
         return cmp(x[0],y[0])
@@ -129,18 +128,11 @@ def compare_year_month(x,y):
 
 # ノートが存在する年と月をリスト化
 def get_note_month(notes):
-    dates_t = {}
-    for note in notes:
-        year = note.date.year
-        month = note.date.month
-        dates_t[(year,month)] = 0
-    
+    dates_t = dict([((note.date.year,note.date.month),0) for note in notes])
     dates_t = dates_t.keys()
     dates_t.sort(compare_year_month,reverse=True)
     
-    dates = []
-    for date in dates_t:
-        dates.append(NoteDate(date[0],date[1]))
+    dates = [NoteDate(date[0],date[1]) for date in dates_t]
     return dates
 
 def user_info(request,user_nick):
@@ -164,6 +156,7 @@ def user(request,user_nick):
     
     resultdict = {}
     dates = []
+    # 年度と月両方が指定されてる場合
     if ('year' in request.GET and 'month' in request.GET) or\
             'year-month' in request.GET:
         if ('year' in request.GET):
@@ -181,7 +174,7 @@ def user(request,user_nick):
                 date__gt=belong.start,
                 date__lt=belong.end).order_by('-date').order_by('-start')
         dates = get_note_month(notes_year)
-    elif 'year' in request.GET:
+    elif 'year' in request.GET: # 年度のみの指定
         year = request.GET['year']
         resultdict['year'] = year
         belong = Belong.objects.get(user=user,start__year=year)
@@ -189,8 +182,9 @@ def user(request,user_nick):
                 date__gt=belong.start,
                 date__lt=belong.end).order_by('-date').order_by('-start')
         dates = get_note_month(notes)
-    else:
-        notes = Note.objects.filter(user=user.id).order_by('-date')
+    else: # 指定なし
+        notes = Note.objects.filter(user=user.id).order_by('-date').\
+                order_by('-start')
 
     tags = make_tagcloud(notes)
 
@@ -261,7 +255,7 @@ def note_create(request):
         ## 入力されてたらそのまま保存
         if (hour > 0) or (min > 0):
             elapsed_min = (hour * 60) + min
-        else:
+        else: ## 入力されてない場合は開始時刻と終了時刻から計算
             elapsed_time = end - start
             elapsed_min = (elapsed_time.seconds)/60
         text_type = int(request.POST['note_text_type'])
@@ -429,18 +423,18 @@ def tag(request):
         dictionary = {'tags':tags,}
         return direct_to_template(request,'note/tag.html',dictionary)
 
-# 関連語による検索結果を表現
-class RelatedNote(object):
-    def __init__(self,note,org_words):
-        self.note = note
-        self.org_words = org_words # 基になった単語
 
 # 関連語による検索結果を表現
 class RelatedWord(object):
     def __init__(self,word,ids):
         self.word = word
-        self.ids = ids
+        self.ids = ids # ノートのリスト
 
+"""
+通常の検索と関連語検索の両方を行う
+通常の検索: AND検索とNOT検索に対応
+関連語検索: AND検索に対応
+"""
 def search(request):
     ## 通常の検索
     keywords = request.GET['keywords']
@@ -466,10 +460,7 @@ def search(request):
         if not keywords.startswith('-'):
             fil.append(Q(word__name=keyword))
     tmp_meta = Metadata.objects.filter(*fil).order_by('-weight')
-    meta = []
-    for m in tmp_meta:
-        if m.note.id not in exist_notes:
-            meta.append(m)
+    meta = [m for m in tmp_meta if m.note.id not in exist_notes]
     
     # メタデータ生成元の単語ごとにまとめる
     related_words_dict = {}
@@ -479,12 +470,10 @@ def search(request):
         else:
             related_words_dict[m.org.name] = [m]
     
-    for rlist in related_words_dict:
-        related_words_dict[rlist].sort(lambda x,y:cmp(x.weight,y.weight),
-                                                                reverse=True)
-    related_words = []
-    for word,value in related_words_dict.items():
-        related_words.append(RelatedWord(word,value))
+    related_words = [RelatedWord(k,v) for k,v in related_words_dict.items()]
+    # 関連度順に降順ソート
+    for i in xrange(len(related_words)):
+        related_words[i].ids.sort(lambda x,y:cmp(x.weight,y.weight),reverse=True)
     related_words.sort(lambda x,y:cmp(len(x.ids),len(y.ids)),reverse=True)
 
     dictionary = {
@@ -500,7 +489,7 @@ class DateOption(object):
         self.num = num
         self.selected = selected
 
-## ノート作成用（日付など）の関数
+## ノート作成フォームの日付などのオプションを作成する
 def create_select_year(now):
     now_year = now.year
     years_num = 11

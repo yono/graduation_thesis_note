@@ -2,7 +2,6 @@ from django.db import models
 from django.contrib.auth.models import User as AuthUser, Group
 from django.contrib.auth import models as auth_models
 from django.conf import settings
-import os
 
 url = settings.ABSOLUTE_URL
 

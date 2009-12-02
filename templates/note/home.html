@@ -40,14 +40,14 @@ value='{{belong.start.year}}'>{{belong.grade}}/{{belong.start.year}}</option>
         <td>{{note.date}}</td>
         <td><a href="/note/note_detail/{{note.id}}">{{note.title}}</a></td>
         {% ifequal theuser.id user.id %}
-        <td><a href="/note/note_edit?note_id={{note.id}}">編集</a></td>
+        <td><a href="/note/note_edit/?note_id={{note.id}}">編集</a></td>
         {% endifequal %}
         <td>{{note.start}}</td>
         <td>{{note.end}}</td>
         <td>{{note.elapsed_time|form_elapsed_time}}</td>
         <td>{{note.locate}}</td>
         {% ifequal theuser.id user.id %}
-        <td><a href="/note/note_delete?note_id={{note.id}}">削除</a></td>
+        <td><a href="/note/note_delete/?note_id={{note.id}}">削除</a></td>
         {% endifequal %}
     </tr>
     {% endfor %}

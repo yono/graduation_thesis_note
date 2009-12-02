@@ -5,7 +5,6 @@ from django.contrib import admin
 from django.contrib.auth.models import User as AuthUser
 from django.contrib.auth.admin import UserAdmin as AuthUserAdmin
 from django.contrib.auth.forms import UserCreationForm
-#from django.contrib.auth import forms
 from django.utils.translation import ugettext, ugettext_lazy as _
 from models import User
 
@@ -27,4 +26,3 @@ class UserAdmin(AuthUserAdmin):
     model = User
 
 admin.site.register(User, UserAdmin)
-#admin.site.unregister(AuthUser)
