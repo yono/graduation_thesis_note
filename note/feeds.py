@@ -2,10 +2,9 @@
 # -*- coding:utf-8 -*-
 from django.contrib.syndication.feeds import Feed
 from graduate.note.models import Note,User,Comment
-import config
+from django.conf import settings
 
-url = config.get_option('django','url')
-
+url = settings.ABSOLUTE_URL
 class LatestNoteFeed(Feed):
     title = u"NAL研卒業研究ノート"
     link = url
@@ -22,7 +21,8 @@ class UserNoteFeed(Feed):
         return User.objects.get(username=bits[0])
 
     def title(self, obj):
-        return u"NAL研卒業研究ノート: %s%s のノート" % (obj.last_name,obj.first_name)
+        return u"NAL研卒業研究ノート: %s%s のノート" % \
+                (obj.last_name,obj.first_name)
 
     def link(self, obj):
         if not obj:

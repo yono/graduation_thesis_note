@@ -1,9 +1,10 @@
 from django.db import models
 from django.contrib.auth.models import User as AuthUser, Group
 from django.contrib.auth import models as auth_models
-import config
+from django.conf import settings
+import os
 
-url = config.get_option('django','url')
+url = settings.ABSOLUTE_URL
 
 class Grade(models.Model):
     name = models.CharField(max_length=100)

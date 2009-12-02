@@ -13,7 +13,6 @@ from math import fabs
 import re
 import creole2html
 import creole
-#import metadata
 
 # タグクラウドを実現
 class TagCloud(object):
