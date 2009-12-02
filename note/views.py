@@ -3,7 +3,7 @@
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import authenticate, login, logout
 from django.template import Context, loader, RequestContext
-from graduate.note.models import User,Note,Belong,Tag,Grade,Comment
+from graduate.note.models import User,Note,Belong,Tag,Grade,Comment,Metadata
 from django.http import HttpResponse, HttpResponseRedirect
 from django.db.models.query import Q
 from django.db import connection
@@ -13,7 +13,7 @@ from math import fabs
 import re
 import creole2html
 import creole
-import metadata
+#import metadata
 
 # タグクラウドを実現
 class TagCloud(object):
@@ -448,6 +448,7 @@ def search(request):
     exc = []
     fil_c = []
     fil_t = []
+    ## AND検索 & NOT検索に対応
     for keyword in keywords.split():
         if keyword.startswith('-'):
             exc.append(Q(content__icontains=keyword[1:]))
@@ -460,40 +461,29 @@ def search(request):
     exist_notes = dict([(note.id,0) for note in notes])
 
     ## 関連語検索
-    m = metadata.MetaData()
-    related_notes = {}
-    related_note_set = set({})
-    for keyword in keywords.split(): # 複数語での検索に対応(NOT検索は無視)
-        related_words = m.search(keyword)
-        tmp_related_notes = {}
-        for id,src_word in related_words: # 基になった語をまとめる
-            id = int(id)
-            # 通常の検索でヒットしたページは無視
-            if id not in exist_notes:
-                if id in related_notes:
-                    tmp_related_notes[id][src_word] = 0
-                    related_notes[id][src_word] = 0
-                else:
-                    tmp_related_notes[id] = {src_word:0}
-                    related_notes[id] = {src_word:0}
-            
-        # set を使ってAND演算を行う
-        tmp_set = set(tmp_related_notes)
-        if len(related_note_set) == 0:
-            related_note_set = related_note_set.union(tmp_set)
-        else:
-            related_note_set = related_note_set.intersection(tmp_set)
-
-    # 基になった単語でまとめる
-    related_words_dict = {}
-    for i in related_note_set:
-        note = Note.objects.get(pk=i)
-        for word in related_notes[i].keys():
-            if word in related_words_dict:
-                related_words_dict[word].append(note)
-            else:
-                related_words_dict[word] = [note]
+    fil = []
+    ## AND検索に対応
+    for keyword in keywords.split():
+        if not keywords.startswith('-'):
+            fil.append(Q(word__name=keyword))
+    tmp_meta = Metadata.objects.filter(*fil).order_by('-weight')
+    meta = []
+    for m in tmp_meta:
+        if m.note.id not in exist_notes:
+            meta.append(m)
     
+    # メタデータ生成元の単語ごとにまとめる
+    related_words_dict = {}
+    for m in meta:
+        if m.org.name in related_words_dict:
+            related_words_dict[m.org.name].append(m)
+        else:
+            related_words_dict[m.org.name] = [m]
+    
+    for rlist in related_words_dict:
+        related_words_dict[rlist].sort(lambda x,y:cmp(x.weight,y.weight),
+                                                                reverse=True)
+    related_words = []
     for word,value in related_words_dict.items():
         related_words.append(RelatedWord(word,value))
     related_words.sort(lambda x,y:cmp(len(x.ids),len(y.ids)),reverse=True)

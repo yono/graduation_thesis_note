@@ -51,13 +51,14 @@
 <h2 id='rword_{{related_word.word}}'>[{{related_word.word}}]</h2>
 <table border="1" cellspacing="0">
     <tr>
-        <th>氏名</th><th>日付</th><th>タイトル</th>
+        <th>氏名</th><th>日付</th><th>タイトル</th><th>weight</th>
     </tr>
     {% for note in related_word.ids %}
     <tr>
-        <td>{{note.user.fullname}}</td>
-        <td>{{note.date}}</td>
-        <td><a href="/note/note_detail/{{note.id}}">{{note.title}}</a></td>
+        <td>{{note.note.user.fullname}}</td>
+        <td>{{note.note.date}}</td>
+        <td><a href="/note/note_detail/{{note.note.id}}">{{note.note.title}}</a></td>
+        <td>{{note.weight}}</td>
     </tr>
     {% endfor %}
 </table>

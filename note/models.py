@@ -78,6 +78,25 @@ class Comment(models.Model):
     def get_absolute_url(self):
         return "%snote_detail/%d/" % (url,self.note.id)
 
+class Word(models.Model):
+    id = models.IntegerField(primary_key=True)
+    name = models.CharField(max_length=300)
+    idf = models.FloatField(null=True, blank=True)
+    freq = models.IntegerField(null=True, blank=True)
+    df = models.IntegerField(null=True, blank=True)
+    appear_ratio = models.FloatField(null=True, blank=True)
+    class Meta:
+        db_table = u'word'
+
+class Metadata(models.Model):
+    id = models.IntegerField(primary_key=True)
+    weight = models.FloatField()
+    note = models.ForeignKey(Note)
+    word = models.ForeignKey(Word,related_name='words')
+    org = models.ForeignKey(Word,related_name='orgs')
+    class Meta:
+        db_table = u'metadata'
+
 from django.contrib import admin
 admin.site.register(Note)
 admin.site.register(Belong)
