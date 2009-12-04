@@ -268,10 +268,11 @@ def note_create(request):
         if request.POST['note_tag_list'] != '':
             tags = request.POST['note_tag_list'].split(',')
             for tag in tags:
-                tag_list = Tag.objects.filter(name=tag)
+                atag = tag.lstrip().rstrip()
+                tag_list = Tag.objects.filter(name=atag)
                 tag_obj = None
                 if len(tag_list) == 0:
-                    tag_obj = Tag(name=tag)
+                    tag_obj = Tag(name=atag)
                     tag_obj.save()
                 else:
                     tag_obj = tag_list[0]
@@ -318,7 +319,7 @@ def note_update(request):
     user_id = request.POST['note_user_id']
     title = request.POST['note_title']
     content = request.POST['note_content']
-    locate = int(request.POST['note_locate'])
+    locate = request.POST['note_locate']
     date_y = int(request.POST['note_date_y'])
     date_m = int(request.POST['note_date_m'])
     date_d = int(request.POST['note_date_d'])
@@ -354,10 +355,11 @@ def note_update(request):
     if request.POST['note_tag_list'] != '':
         tags = request.POST['note_tag_list'].split(',')
         for tag in tags:
-            tag_list = Tag.objects.filter(name=tag)
+            atag = tag.lstrip().rstrip()
+            tag_list = Tag.objects.filter(name=atag)
             tag_obj = None
             if len(tag_list) == 0:
-                tag_obj = Tag(name=tag)
+                tag_obj = Tag(name=atag)
                 tag_obj.save()
             else:
                 tag_obj = tag_list[0]
