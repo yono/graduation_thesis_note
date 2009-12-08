@@ -503,7 +503,6 @@ def create_select_year(now):
     return years
 
 def create_select_month(now):
-    now = datetime.now()
     now_month = now.month
     month_num = 12
     months = []
