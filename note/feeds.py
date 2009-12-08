@@ -3,12 +3,16 @@
 from django.contrib.syndication.feeds import Feed
 from graduate.note.models import Note,User,Comment
 from django.conf import settings
+import datetime
 
 url = settings.ABSOLUTE_URL
 class LatestNoteFeed(Feed):
     title = u"NAL研卒業研究ノート"
     link = url
     description = u"NAL研卒業研究ノート"
+
+    def item_pubdate(self, obj):
+        return obj.start
 
     def items(self):
         return Note.objects.order_by("-id")[:5]
@@ -29,6 +33,9 @@ class UserNoteFeed(Feed):
             raise FeedDoesNotExist
         return obj.get_absolute_url()
 
+    def item_pubdate(self, obj):
+        return obj.start
+
     def description(self, obj):
         return u"NAL研究卒業研究ノート"
 
@@ -45,6 +52,9 @@ class CommentFeed(Feed):
 
     def items(self):
         return Comment.objects.order_by("-id")[:5]
+
+    def item_pubdate(self, obj):
+        return obj.posted_date
 
     #def title(self, obj):
     #    return obj[0].name
