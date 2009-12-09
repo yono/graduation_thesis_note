@@ -16,7 +16,7 @@ class LatestNoteFeed(Feed):
         return obj.start
 
     def items(self):
-        return Note.objects.order_by("-id")[:10]
+        return Note.objects.order_by("-start")[:10]
 
 class UserNoteFeed(Feed):
 
@@ -41,7 +41,7 @@ class UserNoteFeed(Feed):
         return u"NAL研究卒業研究ノート"
 
     def items(self,obj):
-        return Note.objects.filter(user=obj).order_by("-id")[:10]
+        return Note.objects.filter(user=obj).order_by("-start")[:10]
 
 class CommentFeed(Feed):
     title = u"NAL研卒業研究ノート: コメントRSS"
@@ -52,7 +52,7 @@ class CommentFeed(Feed):
     #    return Comment.objects.order_by("-id")[:1]
 
     def items(self):
-        return Comment.objects.order_by("-id")[:10]
+        return Comment.objects.order_by("-start")[:10]
 
     def item_pubdate(self, obj):
         return obj.posted_date
