@@ -52,7 +52,7 @@ class CommentFeed(Feed):
     #    return Comment.objects.order_by("-id")[:1]
 
     def items(self):
-        return Comment.objects.order_by("-start")[:10]
+        return Comment.objects.order_by("-posted_date")[:10]
 
     def item_pubdate(self, obj):
         return obj.posted_date
