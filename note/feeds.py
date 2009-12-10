@@ -48,17 +48,8 @@ class CommentFeed(Feed):
     link = url
     description = u"NAL研卒業研究ノート"
 
-    #def get_object(self,bits):
-    #    return Comment.objects.order_by("-id")[:1]
-
     def items(self):
         return Comment.objects.order_by("-posted_date")[:10]
 
     def item_pubdate(self, obj):
         return obj.posted_date
-
-    #def title(self, obj):
-    #    return obj[0].name
-
-    #def description(self, obj):
-    #    return obj[0].content
