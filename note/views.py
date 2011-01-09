@@ -51,9 +51,6 @@ def make_tagcloud(notes=[]):
         result.append(TagCloud(tag,css_classes[(num-fontmin)/divisor]))
     return result
 
-def get_totaltime(notes=[]):
-    return sum([note.elapsed_time for note in notes])
-
 
 # index のユーザー一覧表の各セルを表現
 class UserTableCell(object):
@@ -101,7 +98,6 @@ def home(request):
         'theuser': user,
         'notes': notes,
         'tags': make_tagcloud(notes),
-        'totaltime': get_totaltime(notes),
         'belongs': Belong.objects.filter(user=user),
     }
 
@@ -186,7 +182,6 @@ def user(request,user_nick):
         'theuser':user,
         'notes':notes,
         'tags':tags,
-        'totaltime':get_totaltime(notes),
         'dates':dates,
         'belongs':belongs,
     }

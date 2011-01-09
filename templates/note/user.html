@@ -1,5 +1,6 @@
 {% extends "note/base.html" %}
 {% load select_date %}
+{% load utils %}
 {% block rss %}
 <link rel="alternate" type="application/rss+xml"
 href="/note/rss/user/{{theuser.username}}/" title="{{theuser.fullname}}のRSS">
@@ -76,7 +77,7 @@ value='{{belong.start.year}}'>{{belong.grade}}/{{belong.start.year}}</option>
     </tr>
     {% endfor %}
 </table>
-<div><h1>合計時間: {{totaltime|form_elapsed_time}}</h1></div>
+<div><h1>合計時間: {{notes|calc_totaltime|form_elapsed_time}}</h1></div>
 {% else %}
 <p> No notes are avaliable. </p>
 {% endif %}
