@@ -51,6 +51,10 @@ def make_tagcloud(notes=[]):
         result.append(TagCloud(tag,css_classes[(num-fontmin)/divisor]))
     return result
 
+def get_totaltime(notes=[]):
+    return sum([note.elapsed_time for note in notes])
+
+
 # index のユーザー一覧表の各セルを表現
 class UserTableCell(object):
     def __init__(self,category,content,users=[]):
@@ -59,56 +63,46 @@ class UserTableCell(object):
         self.users = users # user で使う。ユーザーリスト
 
 def index(request):
-    user_list = User.objects.all()
     years = {}
     grades = Grade.objects.all().order_by('-priority')
 
     ## 年度と所属の一覧を集める
-    for user in user_list:
-        belongs = user.belong_set.all()
-        for belong in belongs:
+    for user in User.objects.all():
+        for belong in user.belong_set.all():
             years[belong.start.year] = 0
 
     year_list = years.keys()
     year_list.sort(reverse=True)
 
-    user_table = [] # ユーザー一覧表
-    belong_list = [UserTableCell('belong','年度')]
-    for grade in grades:
-        belong_list.append(UserTableCell('belong',grade.formalname))
-    user_table.append(belong_list)
+    belongs = [UserTableCell('belong','年度')]
+    belongs.extend([UserTableCell('belong',g.formalname) for g in grades])
+    user_table = [belongs] # ユーザー一覧表
 
     # 年度・所属ごとにユーザーを探す
     for year in year_list:
         yearcolumn = [UserTableCell('year',year)]
-        for i in xrange(1,len(belong_list)):
-            grade_name = belong_list[i].content
+        for i in xrange(1,len(belongs)):
+            grade_name = belongs[i].content
             user_belongs = Belong.objects.filter(start__year=year,
                                     grade__formalname=grade_name)
             yearcolumn.append(UserTableCell('users','',user_belongs))
         user_table.append(yearcolumn)
 
-    tags = make_tagcloud()
-    
-    dictionary = {'user_table':user_table, 'tags':tags,}
+    dictionary = {'user_table': user_table, 'tags': make_tagcloud(),}
 
     return direct_to_template(request,'note/index.html',dictionary)
 
 @login_required
 def home(request):
     user = User.objects.get(username=request.user)
-    notes = Note.objects.filter(user=user.id).order_by('-date')
-    notes = notes.order_by('-start')
-    tags = make_tagcloud(notes)
-    totaltime = sum([note.elapsed_time for note in notes])
-    belongs = Belong.objects.filter(user=user)
-    
+    notes = Note.objects.filter(user=user.id).order_by('-date')\
+                                             .order_by('-start')
     dictionary = {
-        'theuser':user,
-        'notes':notes,
-        'tags':tags,
-        'totaltime':totaltime,
-        'belongs':belongs,
+        'theuser': user,
+        'notes': notes,
+        'tags': make_tagcloud(notes),
+        'totaltime': get_totaltime(notes),
+        'belongs': Belong.objects.filter(user=user),
     }
 
     return direct_to_template(request,'note/home.html',dictionary)
@@ -137,10 +131,9 @@ def get_note_month(notes):
 
 def user_info(request,user_nick):
     user = User.objects.get(username=user_nick)
-    belongs = Belong.objects.filter(user=user).order_by('-start')
     dictionary = {
-        'theuser':user,
-        'belongs':belongs,
+        'theuser': user,
+        'belongs': Belong.objects.filter(user=user).order_by('-start'),
     }
     return direct_to_template(request,'note/user_info.html',dictionary)
 
@@ -189,12 +182,11 @@ def user(request,user_nick):
     tags = make_tagcloud(notes)
 
     belongs = Belong.objects.filter(user=user)
-    totaltime = sum([note.elapsed_time for note in notes])
     dictionary = {
         'theuser':user,
         'notes':notes,
         'tags':tags,
-        'totaltime':totaltime,
+        'totaltime':get_totaltime(notes),
         'dates':dates,
         'belongs':belongs,
     }
@@ -401,15 +393,13 @@ def post_comment(request):
 
 def note(request,note_id):
     note = Note.objects.get(pk=note_id)
-    user = note.user
-    ## wiki形式の場合
-    if note.text_type == 2:
+    comments = Comment.objects.filter(note=note)
+    if note.text_type == 2: # wiki形式の場合
         p = creole.Parser(note.content)
         note.content = creole2html.HtmlEmitter(p.parse()).emit()
     else:
         note.content = note.content.replace('\n','<br />')
-    comments = Comment.objects.filter(note=note)
-    dictionary = {'theuser':user, 'note':note, 'comments':comments,}
+    dictionary = {'theuser':note.user, 'note':note, 'comments':comments,}
     return direct_to_template(request,'note/note.html',dictionary)
 
 def tag(request):
@@ -493,47 +483,42 @@ class DateOption(object):
 
 ## ノート作成フォームの日付などのオプションを作成する
 def create_select_year(now):
-    now_year = now.year
     years_num = 11
     years = []
     for i in xrange(years_num):
-        years.append(DateOption(now_year - 5 + i,''))
-        if years[i].num == now_year:
+        years.append(DateOption(now.year - 5 + i,''))
+        if years[i].num == now.year:
             years[i].selected = 'selected="selected"'
     return years
 
 def create_select_month(now):
-    now_month = now.month
     month_num = 12
     months = []
     for i in xrange(month_num):
         months.append(DateOption(i+1,''))
-        if months[i].num == now_month:
+        if months[i].num == now.month:
             months[i].selected = 'selected'
     return months
 
 def create_select_day(now):
-    now_day = now.day
     day_num = 31
     days = []
     for i in xrange(day_num):
         days.append(DateOption(i+1,False))
-        if days[i].num == now_day:
+        if days[i].num == now.day:
             days[i].selected = 'selected'
     return days
 
 def create_select_hour(now):
-    now_hour = now.hour
     hour_num = 24
     hours = []
     for i in xrange(hour_num):
         hours.append(DateOption(i,False))
-        if hours[i].num == now_hour:
+        if hours[i].num == now.hour:
             hours[i].selected = 'selected'
     return hours
 
 def create_select_min(now):
-    now_min = now.minute
     min_num = 60
     mins = []
     smallest = 1000
@@ -541,8 +526,8 @@ def create_select_min(now):
     count = 0
     for i in xrange(0,min_num,5):
         mins.append(DateOption(i,''))
-        if fabs(i-now_min) < smallest:
-            smallest = fabs(i-now_min)
+        if fabs(i-now.minute) < smallest:
+            smallest = fabs(i-now.minute)
             select_min = count
         count += 1
     mins[select_min].selected = 'selected'
