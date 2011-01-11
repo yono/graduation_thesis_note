@@ -1,7 +1,7 @@
 # Create your views here.
 # -*- coding:utf-8 -*-
 from django.contrib.auth.decorators import login_required
-from graduate.note.models import User,Note,Belong,Tag,Grade,Comment,Metadata
+from graduate.note.models import User,Note,Belong,Tag,Grade,Comment,Metadata,TagCloud,TagCloudNode
 from django.http import HttpResponseRedirect
 from django.db.models.query import Q
 from django.db import connection
@@ -10,47 +10,6 @@ from datetime import datetime
 from math import fabs
 import creole2html
 import creole
-
-# タグクラウドを表現
-class TagCloud(object):
-    def __init__(self,tag,cssclass):
-        self.tag = tag
-        self.cssclass = cssclass
-
-# タグクラウドを生成
-def make_tagcloud(notes=[]):
-    css_classes = ['nube1','nube2','nube3','nube4','nube5']
-    tags = {}
-
-    # O/Rマッパーを使わずSQLを直接実行
-    if len(notes) == 0:
-        cursor = connection.cursor()
-        cursor.execute('''
-        select t.name,count(tg.id) from note_tag t,note_note_tag tg
-        where t.id = tg.tag_id group by tg.tag_id
-        ''')
-        rows = cursor.fetchall()
-        tags = dict(rows)
-
-    # タグの出現回数を数える
-    for note in notes:
-        for tag in note.tag.all():
-            tags[tag.name] = tags.get(tag.name, 0) + 1
-
-    # タグの出現回数に応じてフォントの大きさを決定
-    fontmax = -1000
-    fontmin = 1000
-    for tag_num in tags.values():
-        fontmax = max(fontmax, tag_num)
-        fontmin = min(fontmin, tag_num)
-    
-    divisor = ((fontmax-fontmin) / len(css_classes)) + 1
-
-    result = []
-    for tag,num in tags.items():
-        result.append(TagCloud(tag,css_classes[(num-fontmin)/divisor]))
-    return result
-
 
 # index のユーザー一覧表の各セルを表現
 class UserTableCell(object):
@@ -85,7 +44,7 @@ def index(request):
             yearcolumn.append(UserTableCell('users','',user_belongs))
         user_table.append(yearcolumn)
 
-    dictionary = {'user_table': user_table, 'tags': make_tagcloud(),}
+    dictionary = {'user_table': user_table, 'tags': TagCloud(),}
 
     return direct_to_template(request,'note/index.html',dictionary)
 
@@ -97,7 +56,7 @@ def home(request):
     dictionary = {
         'theuser': user,
         'notes': notes,
-        'tags': make_tagcloud(notes),
+        'tags': TagCloud(notes),
         'belongs': Belong.objects.filter(user=user),
     }
 
@@ -175,7 +134,7 @@ def user(request,user_nick):
         notes = Note.objects.filter(user=user.id).order_by('-date').\
                 order_by('-start')
 
-    tags = make_tagcloud(notes)
+    tags = TagCloud(notes)
 
     belongs = Belong.objects.filter(user=user)
     dictionary = {
@@ -406,7 +365,7 @@ def tag(request):
         dictionary = {'tag':tag, 'notes':notes,}
         return direct_to_template(request,'note/tag_detail.html',dictionary)
     else:
-        tags = make_tagcloud(notes)
+        tags = TagCloud(notes)
         dictionary = {'tags':tags,}
         return direct_to_template(request,'note/tag.html',dictionary)
 

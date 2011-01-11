@@ -1,7 +1,9 @@
+# -*- coding: utf-8 -*-
 from django.db import models
 from django.contrib.auth.models import User as AuthUser, Group
 from django.contrib.auth import models as auth_models
 from django.conf import settings
+from django.db import connection
 
 url = settings.ABSOLUTE_URL
 
@@ -96,6 +98,50 @@ class Metadata(models.Model):
     org = models.ForeignKey(Word,related_name='orgs')
     class Meta:
         db_table = u'metadata'
+
+class TagCloudNode(object):
+    def __init__(self, tag, cssclass):
+        self.tag = tag
+        self.cssclass = cssclass
+
+class TagCloud(object):
+
+    css_classes = ['nube'+str(i) for i in xrange(1, 6)]
+
+    def __init__(notes=[]):
+
+        # タグの出現回数を数える
+        if len(notes) == 0:
+            cursor = connection.cursor()
+            cursor.execute('''
+            SELECT
+                t.name, 
+                count(tg.id) 
+            FROM 
+                note_tag t,
+                note_note_tag tg
+            WHERE
+                t.id = tg.tag_id
+            GROUP BY
+                tg.tag_id
+            ''')
+            tags = dict(cursor.fetchall)
+        else:
+            for note in notes:
+                for tag in note.tag.all():
+                    tags[tag.name] = tags.get(tag.name, 0) + 1
+
+        # タグの出現回数に応じてフォントの大きさを決定 
+        fontmax = -1000
+        fontmin = 1000
+        for tag_num  in tags.values():
+            fontmax = max(fontmax, tag_num)
+            fontmin = max(fontmin, tag_num)
+
+        divisor = ((fontmax - fontmin) / len(css_classes)) + 1
+
+        return [TagCloudNode(t, css_classes[(n - fontmin)/divisor]) for t, n in tags.items()]
+    
 
 from django.contrib import admin
 admin.site.register(Note)
