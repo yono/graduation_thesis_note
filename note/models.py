@@ -107,8 +107,11 @@ class TagCloudNode(object):
 class TagCloud(object):
 
     css_classes = ['nube'+str(i) for i in xrange(1, 6)]
+    nodes = []
 
-    def __init__(notes=[]):
+    def __init__(self, notes=[]):
+
+        tags = {}
 
         # タグの出現回数を数える
         if len(notes) == 0:
@@ -125,22 +128,23 @@ class TagCloud(object):
             GROUP BY
                 tg.tag_id
             ''')
-            tags = dict(cursor.fetchall)
-        else:
-            for note in notes:
-                for tag in note.tag.all():
-                    tags[tag.name] = tags.get(tag.name, 0) + 1
+            tags = dict(cursor.fetchall())
+
+        for note in notes:
+            for tag in note.tag.all():
+                tags[tag.name] = tags.get(tag.name, 0) + 1
 
         # タグの出現回数に応じてフォントの大きさを決定 
         fontmax = -1000
         fontmin = 1000
         for tag_num  in tags.values():
             fontmax = max(fontmax, tag_num)
-            fontmin = max(fontmin, tag_num)
+            fontmin = min(fontmin, tag_num)
 
-        divisor = ((fontmax - fontmin) / len(css_classes)) + 1
+        print self.css_classes
+        divisor = ((fontmax - fontmin) / len(self.css_classes)) + 1
 
-        return [TagCloudNode(t, css_classes[(n - fontmin)/divisor]) for t, n in tags.items()]
+        self.nodes = [TagCloudNode(t, self.css_classes[(n - fontmin)/divisor]) for t, n in tags.items()]
     
 
 from django.contrib import admin

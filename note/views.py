@@ -43,8 +43,10 @@ def index(request):
                                     grade__formalname=grade_name)
             yearcolumn.append(UserTableCell('users','',user_belongs))
         user_table.append(yearcolumn)
+    
+    tc = TagCloud()
 
-    dictionary = {'user_table': user_table, 'tags': TagCloud(),}
+    dictionary = {'user_table': user_table, 'tags': tc.nodes,}
 
     return direct_to_template(request,'note/index.html',dictionary)
 
@@ -53,10 +55,11 @@ def home(request):
     user = User.objects.get(username=request.user)
     notes = Note.objects.filter(user=user.id).order_by('-date')\
                                              .order_by('-start')
+    tc = TagCloud(notes)
     dictionary = {
         'theuser': user,
         'notes': notes,
-        'tags': TagCloud(notes),
+        'tags': tc.nodes,
         'belongs': Belong.objects.filter(user=user),
     }
 
@@ -134,13 +137,13 @@ def user(request,user_nick):
         notes = Note.objects.filter(user=user.id).order_by('-date').\
                 order_by('-start')
 
-    tags = TagCloud(notes)
+    tc = TagCloud(notes)
 
     belongs = Belong.objects.filter(user=user)
     dictionary = {
         'theuser':user,
         'notes':notes,
-        'tags':tags,
+        'tags':tc.nodes,
         'dates':dates,
         'belongs':belongs,
     }
@@ -365,8 +368,8 @@ def tag(request):
         dictionary = {'tag':tag, 'notes':notes,}
         return direct_to_template(request,'note/tag_detail.html',dictionary)
     else:
-        tags = TagCloud(notes)
-        dictionary = {'tags':tags,}
+        tc = TagCloud(notes)
+        dictionary = {'tags':tc.nodes,}
         return direct_to_template(request,'note/tag.html',dictionary)
 
 
