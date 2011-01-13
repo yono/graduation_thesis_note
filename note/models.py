@@ -99,6 +99,32 @@ class Metadata(models.Model):
     class Meta:
         db_table = u'metadata'
 
+class NoteDate(object):
+    def __init__(self, year, month):
+        self.year = year
+        self.month = month
+
+class NoteList(object):
+    
+    notes = []
+    
+    def __init__(self, notes=[]):
+        self.notes = notes
+        self.dates = []
+    
+    def sort_by_date(self):
+
+        dates = dict([((note.date.year, note.date.month),0) for note in self.notes])
+        dates = dates.keys()
+        dates.sort(self._compare_by_year_month, reverse=True)
+        self.dates = [NoteDate(date[0], date[1]) for date in dates]
+
+    def _compare_by_year_month(self, x, y):
+        if cmp(x[0], y[0]) != 0:
+            return cmp(x[0], y[0])
+        else:
+            return cmp(x[1], y[1])
+
 class TagCloudNode(object):
     def __init__(self, tag, cssclass):
         self.tag = tag

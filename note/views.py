@@ -1,7 +1,7 @@
 # Create your views here.
 # -*- coding:utf-8 -*-
 from django.contrib.auth.decorators import login_required
-from graduate.note.models import User,Note,Belong,Tag,Grade,Comment,Metadata,TagCloud,TagCloudNode
+from graduate.note.models import User,Note,Belong,Tag,Grade,Comment,Metadata,TagCloud,TagCloudNode,NoteList
 from django.http import HttpResponseRedirect
 from django.db.models.query import Q
 from django.db import connection
@@ -19,6 +19,8 @@ class UserTableCell(object):
         self.users = users # user で使う。ユーザーリスト
 
 def index(request):
+    notes = Note.objects.all()
+    print notes[0].date.year
     years = {}
     grades = Grade.objects.all().order_by('-priority')
 
@@ -65,27 +67,6 @@ def home(request):
 
     return direct_to_template(request,'note/home.html',dictionary)
 
-# 年度と月の組を扱うクラス
-class NoteDate(object):
-    def __init__(self,year,month):
-        self.year  = year
-        self.month = month
-
-# 年と月をソートする際の比較関数
-def compare_year_month(x,y):
-    if cmp(x[0],y[0]) != 0:
-        return cmp(x[0],y[0])
-    else:
-        return cmp(x[1],y[1])
-
-# ノートが存在する年と月をリスト化
-def get_note_month(notes):
-    dates_t = dict([((note.date.year,note.date.month),0) for note in notes])
-    dates_t = dates_t.keys()
-    dates_t.sort(compare_year_month,reverse=True)
-    
-    dates = [NoteDate(date[0],date[1]) for date in dates_t]
-    return dates
 
 def user_info(request,user_nick):
     user = User.objects.get(username=user_nick)
@@ -124,7 +105,12 @@ def user(request,user_nick):
         notes_year = Note.objects.filter(user__username=user_nick,
                 date__gt=belong.start,
                 date__lt=belong.end).order_by('-date').order_by('-start')
-        dates = get_note_month(notes_year)
+        notes_year.query.group_by = ['date']
+        for note in notes_year:
+            print note.date.year, note.date.month
+        notes_l = NoteList(notes_year)
+        notes_l.sort_by_date()
+        dates = notes_l.dates
     elif 'year' in request.GET: # 年度のみの指定
         year = request.GET['year']
         resultdict['year'] = year
@@ -132,10 +118,16 @@ def user(request,user_nick):
         notes = Note.objects.filter(user__username=user_nick,
                 date__gt=belong.start,
                 date__lt=belong.end).order_by('-date').order_by('-start')
-        dates = get_note_month(notes)
+        notes_l = NoteList(notes)
+        notes_l.sort_by_date()
+        dates = notes_l.dates
     else: # 指定なし
         notes = Note.objects.filter(user=user.id).order_by('-date').\
                 order_by('-start')
+        notes_l = NoteList(notes)
+        notes_l.sort_by_date()
+        dates = notes_l.dates
+        
 
     tc = TagCloud(notes)
 
