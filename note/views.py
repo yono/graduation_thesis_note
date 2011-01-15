@@ -5,6 +5,7 @@ from graduate.note.models import User,Note,Belong,Tag,Grade,Comment,Metadata,Tag
 from django.http import HttpResponseRedirect
 from django.db.models.query import Q
 from django.db import connection
+from django.views.decorators.http import require_GET, require_POST
 from django.views.generic.simple import direct_to_template
 from datetime import datetime
 from math import fabs
@@ -20,7 +21,6 @@ class UserTableCell(object):
 
 def index(request):
     notes = Note.objects.all()
-    print notes[0].date.year
     years = {}
     grades = Grade.objects.all().order_by('-priority')
 
@@ -166,6 +166,7 @@ def check_time(ftime):
     return time
 
 @login_required
+@require_POST
 def note_create(request):
     if 'note_user_id' not in request.POST:
         return HttpResponseRedirect('/note/note_new/')
@@ -254,6 +255,7 @@ def note_edit(request):
     return direct_to_template(request,'note/note_edit.html',dictionary)
 
 @login_required
+@require_POST
 def note_update(request):
     note_id = request.POST['note_id']
     note = Note.objects.get(pk=note_id)
@@ -325,6 +327,7 @@ def note_destroy(request):
 
     return HttpResponseRedirect('/note/user/%s/' % (user.username))
 
+@require_POST
 def post_comment(request):
     if 'comment_note_id' in request.POST:
         note_id = int(request.POST['comment_note_id'])
