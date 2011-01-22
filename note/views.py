@@ -146,84 +146,23 @@ def user(request,user_nick):
 def note_new(request):
     if 'user' in request.GET:
         user = User.objects.get(pk=request.GET['user'])
-        now = datetime.now()
-        form = NoteForm(initial={'testdate':now})
+        form = NoteForm(initial={'user':user})
         dictionary = {
             'theuser':user,
-            'date_year' :create_select_year(now),
-            'date_month':create_select_month(now),
-            'date_day'  :create_select_day(now),
-            'date_hour' :create_select_hour(now),
-            'date_min'  :create_select_min(now),
             'form': form
         }
         return direct_to_template(request,'note/note_new.html',dictionary)
     else:
         return HttpResponseRedirect('/note/')
 
-def check_time(ftime):
-    if ftime.isdigit():
-        time = int(ftime)
-    else:
-        time = 0
-    return time
-
 @login_required
 @require_POST
 def note_create(request):
-    if 'note_user_id' not in request.POST:
+    if 'user' not in request.POST:
         return HttpResponseRedirect('/note/note_new/')
     else:
-        user_id = request.POST['note_user_id']
-        title = request.POST['note_title']
-        content = request.POST['note_content']
-        locate = request.POST['note_locate']
-        date_y = int(request.POST['note_date_y'])
-        date_m = int(request.POST['note_date_m'])
-        date_d = int(request.POST['note_date_d'])
-        date = datetime(date_y,date_m,date_d)
-        start_y = int(request.POST['note_start_y'])
-        start_m = int(request.POST['note_start_m'])
-        start_d = int(request.POST['note_start_d'])
-        start_h = int(request.POST['note_start_h'])
-        start_mi = int(request.POST['note_start_mi'])
-        start = datetime(start_y,start_m,start_d,start_h,start_mi)
-        end_y = int(request.POST['note_end_y'])
-        end_m = int(request.POST['note_end_m'])
-        end_d = int(request.POST['note_end_d'])
-        end_h = int(request.POST['note_end_h'])
-        end_mi = int(request.POST['note_end_mi'])
-        end = datetime(end_y,end_m,end_d,end_h,end_mi)
-        ## 数字が入力されてるかチェック
-        hour = check_time(request.POST['hour'])
-        min = check_time(request.POST['min'])
-        ## 入力されてたらそのまま保存
-        if (hour > 0) or (min > 0):
-            elapsed_min = (hour * 60) + min
-        else: ## 入力されてない場合は開始時刻と終了時刻から計算
-            elapsed_time = end - start
-            elapsed_min = (elapsed_time.seconds)/60
-        text_type = int(request.POST['note_text_type'])
-        note = Note(title=title,content=content,locate=locate,date=date,
-                start=start,end=end,elapsed_time=elapsed_min,user_id=user_id,
-                text_type=text_type)
-        note.save()
-
-        # タグを登録
-        if request.POST['note_tag_list'] != '':
-            tags = request.POST['note_tag_list'].split(',')
-            for tag in tags:
-                atag = tag.lstrip().rstrip()
-                tag_list = Tag.objects.filter(name=atag)
-                tag_obj = None
-                if len(tag_list) == 0:
-                    tag_obj = Tag(name=atag)
-                    tag_obj.save()
-                else:
-                    tag_obj = tag_list[0]
-                note.tag.add(tag_obj) 
-            note.save()
-        
+        form = NoteForm(request.POST)
+        note = form.save()
         return HttpResponseRedirect('/note/note_detail/%d/' % (note.id))
 
 @login_required
@@ -361,62 +300,4 @@ def search(request):
         'related_words':related_words,
     }
     return direct_to_template(request,'note/search.html',dictionary)
-
-## option タグに渡す値と選択されてるかどうかのフラグ
-class DateOption(object):
-    def __init__(self,num,selected):
-        self.num = num
-        self.selected = selected
-
-## ノート作成フォームの日付などのオプションを作成する
-def create_select_year(now):
-    years_num = 11
-    years = []
-    for i in xrange(years_num):
-        years.append(DateOption(now.year - 5 + i,''))
-        if years[i].num == now.year:
-            years[i].selected = 'selected="selected"'
-    return years
-
-def create_select_month(now):
-    month_num = 12
-    months = []
-    for i in xrange(month_num):
-        months.append(DateOption(i+1,''))
-        if months[i].num == now.month:
-            months[i].selected = 'selected'
-    return months
-
-def create_select_day(now):
-    day_num = 31
-    days = []
-    for i in xrange(day_num):
-        days.append(DateOption(i+1,False))
-        if days[i].num == now.day:
-            days[i].selected = 'selected'
-    return days
-
-def create_select_hour(now):
-    hour_num = 24
-    hours = []
-    for i in xrange(hour_num):
-        hours.append(DateOption(i,False))
-        if hours[i].num == now.hour:
-            hours[i].selected = 'selected'
-    return hours
-
-def create_select_min(now):
-    min_num = 60
-    mins = []
-    smallest = 1000
-    select_min = 0
-    count = 0
-    for i in xrange(0,min_num,5):
-        mins.append(DateOption(i,''))
-        if fabs(i-now.minute) < smallest:
-            smallest = fabs(i-now.minute)
-            select_min = count
-        count += 1
-    mins[select_min].selected = 'selected'
-    return mins
 

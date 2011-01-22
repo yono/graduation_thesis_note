@@ -8,145 +8,12 @@
 <p>{{theuser.username}} の研究ノートを追加する</p>
 
 <form action='/note/note_create/' method="post">
-<table>
-<tr>
-    <td>User_id</td>
-    <td>{{theuser.id}}<input id="note_user_id" name="note_user_id" type="hidden"
-        value="{{theuser.id}}" /></td>
-</tr>
-
-<tr>
-<td><label>日付</label></td>
-<td><select id="note_date_y" name="note_date_y">
-{% for year in date_year %}
-<option value="{{year.num}}" {{year.selected|safe}}>{{year.num}}</option>
-{% endfor %}
-</select>
-<select id="note_date_m" name="note_date_m">
-{% for month in date_month %}
-<option value="{{month.num}}" {{month.selected|safe}}>{{month.num}}</option>
-{% endfor %}
-</select>
-<select id="note_date_d" name="note_date_d">
-{% for day in date_day %}
-<option value="{{day.num}}" {{day.selected|safe}}>{{day.num}}</option>
-{% endfor %}
-</select>
-</td>
-</tr>
-
-<tr>
-<td><label>開始時刻</label></td>
-<td><select id="note_start_y" name="note_start_y">
-{% for year in date_year %}
-<option value="{{year.num}}" {{year.selected|safe}}>{{year.num}}</option>
-{% endfor %}
-</select>
-<select id="note_start_m" name="note_start_m">
-{% for month in date_month %}
-<option value="{{month.num}}" {{month.selected|safe}}>{{month.num}}</option>
-{% endfor %}
-</select>
-<select id="note_start_d" name="note_start_d">
-{% for day in date_day %}
-<option value="{{day.num}}"{{day.selected|safe}}>{{day.num}}</option>
-{% endfor %}
-</select>
-&mdash;
-<select id="note_start_h" name="note_start_h">
-{% for hour in date_hour %}
-<option value="{{hour.num}}"{{hour.selected|safe}}>{{hour.num}}</option>
-{% endfor %}
-</select>
-<select id="note_start_mi" name="note_start_mi">
-{% for min in date_min %}
-<option value="{{min.num}}" {{min.selected|safe}}>{{min.num}}</option>
-{% endfor %}
-</select>
-</td>
-</tr>
-
-<tr>
-<td><label>終了時刻</label></td>
-<td><select id="note_end_y" name="note_end_y">
-{% for year in date_year %}
-<option value="{{year.num}}"{{year.selected|safe}}>{{year.num}}</option>
-{% endfor %}
-</select>
-<select id="note_end_m" name="note_end_m">
-{% for month in date_month %}
-<option value="{{month.num}}"{{month.selected|safe}}>{{month.num}}</option>
-{% endfor %}
-</select>
-<select id="note_end_d" name="note_end_d">
-{% for day in date_day %}
-<option value="{{day.num}}"{{day.selected|safe}}>{{day.num}}</option>
-{% endfor %}
-</select>
-&mdash;
-<select id="note_end_h" name="note_end_h">
-{% for hour in date_hour %}
-<option value="{{hour.num}}"{{hour.selected|safe}}>{{hour.num}}</option>
-{% endfor %}
-</select>
-<select id="note_end_mi" name="note_end_mi">
-{% for min in date_min %}
-<option value="{{min.num}}"{{min.selected|safe}}>{{min.num}}</option>
-{% endfor %}
-</select>
-</td>
-</tr>
-
-<tr>
-<td><label>経過時間</label></td>
-<td>
-<input id="hour" name="hour" size="5" type="text" value="0" />時間<input
-id="min" name="min" size="5" type="text" value="0" />分 ※新規作成時は自動計算
-されます
-</td>
-</tr>
-    
-<tr>
-<td><label>テキストタイプ</label></td>
-<td><input type="radio" name="note_text_type" value="1" checked>HTML
-    <input type="radio" name="note_text_type" value="2">Wiki
-</td>
-</tr>
-
-<tr>
-<td><label>タイトル</label></td>
-<td>
-<input id="note_title" name="note_title" type="text" value="" />
-</td>
-</tr>
-    
-<tr>
-<td><label>内容</label></td>
-<td>
-<textarea cols="70" id="note_content" name="note_content" rows="20"></textarea>
-</td>
-</tr>
-
-<tr>
-<td><label>場所</label></td>
-<td>
-<input id="note_locate" name="note_locate" size="10" type="text" value="" />
-</td>
-</tr>
-
-<tr>
-<td><label>Tag</label></td>
-<td>
-<input id="note_tag_list" name="note_tag_list" size="30" type="text" value="" />
-</td>
-</tr>
-
-</table>
-<input name="commit" type="submit" value="Create" />
-</form>
-
-<form action='/hoge/' method='POST'>
+  <input id="note_id" name="note_id" type="hidden" value="{{note.id}}" />
   <table>
+    <tr>
+      <td><label>{{form.user.label}}</label></td>
+      <td>{{form.user}}</td>
+    </tr>
     <tr>
       <td><label>{{form.date.label}}</label></td>
       <td>{{form.date}}</td>
@@ -184,6 +51,7 @@ id="min" name="min" size="5" type="text" value="0" />分 ※新規作成時は�
       <td>{{form.tag}}</td>
     </tr>
   </table>
+  <input name="commit" type="submit" value="Create" />
 </form>
 
 {% endblock content %}
