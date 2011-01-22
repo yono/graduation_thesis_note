@@ -7,6 +7,7 @@
 <h1>ノート編集</h1>
 <p>{{note.user.username}} の研究ノートを編集する</p>
 
+<!--
 <form action='/note/note_update/' method="post">
 <table id='edit'>
 <tr>
@@ -153,5 +154,51 @@ value="{% for tag in note.tag.all %}{{tag}},{% endfor %}"
 </table>
 <input name="commit" type="submit" value="Update" />
 </form>
-
+-->
+<form action='/note/note_update/' method='POST'>
+  <input id="note_id" name="note_id" type="hidden" value="{{note.id}}" />
+  <table>
+    <tr>
+      <td><label>{{form.user.label}}</label></td>
+      <td>{{form.user}}</td>
+    </tr>
+    <tr>
+      <td><label>{{form.date.label}}</label></td>
+      <td>{{form.date}}</td>
+    </tr>
+    <tr>
+      <td><label>{{form.start.label}}</label></td>
+      <td>{{form.start}}</td>
+    </tr>
+    <tr>
+      <td><label>{{form.end.label}}</label></td>
+      <td>{{form.end}}</td>
+    </tr>
+    <tr>
+      <td><label>{{form.elapsed_time.label}}</label></td>
+      <td>{{form.elapsed_time}}</td>
+    </tr>
+    <tr>
+      <td><label>{{form.text_type.label}}</label></td>
+      <td>{{form.text_type}}</td>
+    </tr>
+    <tr>
+      <td><label>{{form.title.label}}</label></td>
+      <td>{{form.title}}</td>
+    </tr>
+    <tr>
+      <td><label>{{form.content.label}}</label></td>
+      <td>{{form.content}}</td>
+    </tr>
+    <tr>
+      <td><label>{{form.locate.label}}</label></td>
+      <td>{{form.locate}}</td>
+    </tr>
+    <tr>
+      <td><label>{{form.tag.label}}</label></td>
+      <td>{{form.tag}}</td>
+    </tr>
+  </table>
+<input name="commit" type="submit" value="Update" />
+</form>
 {% endblock content %}

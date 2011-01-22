@@ -11,6 +11,7 @@ from datetime import datetime
 from math import fabs
 import creole2html
 import creole
+from graduate.note.forms import NoteForm
 
 # index のユーザー一覧表の各セルを表現
 class UserTableCell(object):
@@ -146,6 +147,7 @@ def note_new(request):
     if 'user' in request.GET:
         user = User.objects.get(pk=request.GET['user'])
         now = datetime.now()
+        form = NoteForm(initial={'testdate':now})
         dictionary = {
             'theuser':user,
             'date_year' :create_select_year(now),
@@ -153,6 +155,7 @@ def note_new(request):
             'date_day'  :create_select_day(now),
             'date_hour' :create_select_hour(now),
             'date_min'  :create_select_min(now),
+            'form': form
         }
         return direct_to_template(request,'note/note_new.html',dictionary)
     else:
@@ -227,30 +230,10 @@ def note_create(request):
 def note_edit(request):
     note_id = request.GET['note_id']
     note = Note.objects.get(pk=note_id)
-    now = note.date
-    start = note.start
-    end = note.end
-
-    elapsed_hour = note.elapsed_time / 60
-    elapsed_min  = note.elapsed_time % 60
-
+    form = NoteForm(instance=note)
     dictionary = {
         'note':note,
-        'date_year'  :create_select_year(now),
-        'date_month' :create_select_month(now),
-        'date_day'   :create_select_day(now),
-        'start_year' :create_select_year(start),
-        'start_month':create_select_month(start),
-        'start_day'  :create_select_day(start),
-        'start_hour' :create_select_hour(start),
-        'start_min'  :create_select_min(start),
-        'end_year'   :create_select_year(end),
-        'end_month'  :create_select_month(end),
-        'end_day'    :create_select_day(end),
-        'end_hour'   :create_select_hour(end),
-        'end_min'    :create_select_min(end),
-        'elapsed_hour':elapsed_hour,
-        'elapsed_min':elapsed_min,
+        'form': form,
     }
     return direct_to_template(request,'note/note_edit.html',dictionary)
 
@@ -259,56 +242,8 @@ def note_edit(request):
 def note_update(request):
     note_id = request.POST['note_id']
     note = Note.objects.get(pk=note_id)
-    user_id = request.POST['note_user_id']
-    title = request.POST['note_title']
-    content = request.POST['note_content']
-    locate = request.POST['note_locate']
-    date_y = int(request.POST['note_date_y'])
-    date_m = int(request.POST['note_date_m'])
-    date_d = int(request.POST['note_date_d'])
-    date = datetime(date_y,date_m,date_d)
-    start_y = int(request.POST['note_start_y'])
-    start_m = int(request.POST['note_start_m'])
-    start_d = int(request.POST['note_start_d'])
-    start_h = int(request.POST['note_start_h'])
-    start_mi = int(request.POST['note_start_mi'])
-    start = datetime(start_y,start_m,start_d,start_h,start_mi)
-    end_y = int(request.POST['note_end_y'])
-    end_m = int(request.POST['note_end_m'])
-    end_d = int(request.POST['note_end_d'])
-    end_h = int(request.POST['note_end_h'])
-    end_mi = int(request.POST['note_end_mi'])
-    end = datetime(end_y,end_m,end_d,end_h,end_mi)
-    ## 数字が入力されてるかチェック
-    hour = check_time(request.POST['hour'])
-    min = check_time(request.POST['min'])
-    elapsed_min = (hour * 60) + min
-    text_type = int(request.POST['note_text_type'])
-    note.title = title
-    note.content = content
-    note.locate = locate
-    note.date = date
-    note.start = start
-    note.end = end
-    note.elapsed_time = elapsed_min
-    note.text_type = text_type
-    note.save()
-
-    note.tag.clear()
-    if request.POST['note_tag_list'] != '':
-        tags = request.POST['note_tag_list'].split(',')
-        for tag in tags:
-            atag = tag.lstrip().rstrip()
-            tag_list = Tag.objects.filter(name=atag)
-            tag_obj = None
-            if len(tag_list) == 0:
-                tag_obj = Tag(name=atag)
-                tag_obj.save()
-            else:
-                tag_obj = tag_list[0]
-            note.tag.add(tag_obj) 
-        note.save()
-    
+    form = NoteForm(request.POST, instance=note)
+    form.save()
     return HttpResponseRedirect('/note/note_detail/%d/' % (note.id))
 
 @login_required
