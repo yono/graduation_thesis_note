@@ -67,6 +67,8 @@
 {% endfor %}
 
 {% if user %}
+{{comment_form.as_p}}
+<!--
 <form action='/note/post_comment/' method="POST">
 <p><label>Name</label>
 <input id="comment_name" name="comment_name" size="30" type="text" /></p>
@@ -77,6 +79,7 @@
 value="{{note.id}}" />
 <input name="commit" type="submit" value="コメント投稿" />
 </form>
+-->
 {% endif %}
 
 {% ifequal user.username note.user.username %}
