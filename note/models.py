@@ -167,9 +167,7 @@ class TagCloud(object):
             fontmax = max(fontmax, tag_num)
             fontmin = min(fontmin, tag_num)
 
-        print self.css_classes
         divisor = ((fontmax - fontmin) / len(self.css_classes)) + 1
-
         self.nodes = [TagCloudNode(t, self.css_classes[(n - fontmin)/divisor]) for t, n in tags.items()]
     
 
