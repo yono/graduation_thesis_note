@@ -22,7 +22,8 @@ class NoteForm(forms.ModelForm):
             widget=SplitSelectDateTimeWidget(minute_step=5, years=range(2000,2021)))
     elapsed_time = forms.IntegerField(label='経過時間', widget=ElapsedTimeWidget)
     tag = TagField(widget=TagWidget)
-    text_type = forms.IntegerField(label='テキストタイプ')
+    text_type = forms.IntegerField(label='テキストタイプ', 
+            widget=forms.Select(choices=(('1','HTML'),('2','Wiki'))))
 
     class Meta:
         model = Note

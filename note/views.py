@@ -175,7 +175,9 @@ def note_edit(request):
 @login_required
 @require_POST
 def note_update(request):
-    form = NoteForm(request.POST)
+    note_id = request.POST['note_id']
+    note = Note.objects.get(pk=note_id)
+    form = NoteForm(request.POST, instance=note)
     note = form.save()
     return HttpResponseRedirect('/note/note_detail/%d/' % (note.id))
 
