@@ -9,8 +9,6 @@ from django.views.decorators.http import require_GET, require_POST
 from django.views.generic.simple import direct_to_template
 from datetime import datetime
 from math import fabs
-import creole2html
-import creole
 from graduate.note.forms import NoteForm, CommentForm
 
 # index のユーザー一覧表の各セルを表現
@@ -214,11 +212,6 @@ def note(request,note_id):
     note = Note.objects.get(pk=note_id)
     comments = Comment.objects.filter(note=note)
     comment_form = CommentForm(initial={'note':note.id})
-    if note.text_type == 2: # wiki形式の場合
-        p = creole.Parser(note.content)
-        note.content = creole2html.HtmlEmitter(p.parse()).emit()
-    else:
-        note.content = note.content.replace('\n','<br />')
     dictionary = {'theuser':note.user, 'note':note, 'comments':comments, 'comment_form':comment_form}
     return direct_to_template(request,'note/note.html',dictionary)
 

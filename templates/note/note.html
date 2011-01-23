@@ -1,5 +1,6 @@
 {% extends 'note/base.html' %}
 {% load select_date %}
+{% load utils %}
 {% block title %} 
 {{note.title}}
 {% endblock title %}
@@ -34,7 +35,7 @@
     </tr>
     <tr>
         <td><nobr>内容</nobr></td>
-        <td>{{note.content|safe}}</td>
+        <td>{{note.content|convert_content:note.text_type|safe}}</td>
     </tr>
     <tr>
         <td><nobr>タグ</nobr></td>
