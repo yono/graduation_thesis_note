@@ -216,7 +216,6 @@ def note(request,note_id):
     return direct_to_template(request,'note/note.html',dictionary)
 
 def tag(request):
-    notes = Note.objects.all()
     tag = ''
     if 'tag' in request.GET:
         tag = Tag.objects.get(name=request.GET['tag'])
@@ -224,6 +223,7 @@ def tag(request):
         dictionary = {'tag':tag, 'notes':notes,}
         return direct_to_template(request,'note/tag_detail.html',dictionary)
     else:
+        notes = Note.objects.all()
         tc = TagCloud(notes)
         dictionary = {'tags':tc.nodes,}
         return direct_to_template(request,'note/tag.html',dictionary)
