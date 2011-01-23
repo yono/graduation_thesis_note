@@ -4,11 +4,9 @@ from django.contrib.auth.decorators import login_required
 from graduate.note.models import User,Note,Belong,Tag,Grade,Comment,Metadata,TagCloud,TagCloudNode,NoteList
 from django.http import HttpResponseRedirect
 from django.db.models.query import Q
-from django.db import connection
 from django.views.decorators.http import require_GET, require_POST
 from django.views.generic.simple import direct_to_template
 from datetime import datetime
-from math import fabs
 from graduate.note.forms import NoteForm, CommentForm
 
 # index のユーザー一覧表の各セルを表現
@@ -177,10 +175,8 @@ def note_edit(request):
 @login_required
 @require_POST
 def note_update(request):
-    note_id = request.POST['note_id']
-    note = Note.objects.get(pk=note_id)
-    form = NoteForm(request.POST, instance=note)
-    form.save()
+    form = NoteForm(request.POST)
+    note = form.save()
     return HttpResponseRedirect('/note/note_detail/%d/' % (note.id))
 
 @login_required
@@ -199,6 +195,7 @@ def note_destroy(request):
 
     return HttpResponseRedirect('/note/user/%s/' % (user.username))
 
+@login_required
 @require_POST
 def post_comment(request):
     form = CommentForm(request.POST)

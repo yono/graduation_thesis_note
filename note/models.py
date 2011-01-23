@@ -20,7 +20,7 @@ class User(AuthUser):
     objects = auth_models.UserManager()
 
     def __unicode__(self):
-        return self.username
+        return str(self.id)
 
     def fullname(self):
         return u'%s%s' %  (self.last_name,self.first_name)

@@ -3,12 +3,14 @@
 from django import forms
 from django.forms.extras.widgets import SelectDateWidget
 from datetime import datetime
-from graduate.note.models import Note, Tag, Comment
+from graduate.note.models import Note, Tag, Comment, User
 from graduate.note.widgets import SplitSelectDateTimeWidget, ElapsedTimeWidget, SelectTimeWidget, TagWidget, TagField
 
 
 class NoteForm(forms.ModelForm):
 
+    user = forms.ModelChoiceField(queryset=User.objects.all(),
+            widget=forms.HiddenInput())
     title = forms.CharField(label=u'タイトル', max_length=200)
     content = forms.CharField(label=u'内容',widget=forms.Textarea(attrs={'cols':'70', 'rows':'20'}))
     locate = forms.CharField(label=u'場所', max_length=100)
