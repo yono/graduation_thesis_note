@@ -158,6 +158,52 @@ class NoteListTest(unittest.TestCase):
         self.assertEqual(self.note_list._compare_by_year_month(date1, date2), -1)
         self.assertEqual(self.note_list._compare_by_year_month(date1, date1), 0)
 
+
+class TagCloudTest(unittest.TestCase):
+
+    def setUp(self):
+        self.tag1 = Tag.objects.create(name='tag1')
+        self.tag2 = Tag.objects.create(name='tag2')
+        self.user = User.objects.create(username='fuga')
+        self.note1 = Note.objects.create(
+                        title='タイトルテスト',
+                        content='内容テスト',
+                        locate='場所テスト',
+                        date=datetime.date(2010, 4, 20),
+                        start=datetime.datetime.now(),
+                        end=datetime.datetime.now(),
+                        elapsed_time=10,
+                        user=self.user,
+                        text_type=1
+                    )
+        self.note2 = Note.objects.create(
+                        title='タイトルテスト',
+                        content='内容テスト',
+                        locate='場所テスト',
+                        date=datetime.date(2010, 4, 20),
+                        start=datetime.datetime.now(),
+                        end=datetime.datetime.now(),
+                        elapsed_time=10,
+                        user=self.user,
+                        text_type=1
+                    )
+        self.note1.tag.add(self.tag1)
+        self.note1.tag.add(self.tag2)
+        self.note2.tag.add(self.tag1)
+
+
+    def tearDown(self):
+        user = AuthUser.objects.get(username='fuga')
+        user.delete()
+
+    def test_get_tagcount_from_notes(self):
+        tagcloud = TagCloud()
+        notes = Note.objects.all()
+        tagcount = tagcloud.get_tagcount_from_notes(notes)
+        assert self.tag1.name in tagcount
+        assert self.tag2.name in tagcount
+
+
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(NoteTest)
     GrowlTestRunner().run(suite)

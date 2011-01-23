@@ -138,27 +138,7 @@ class TagCloud(object):
     def __init__(self, notes=[]):
 
         tags = {}
-
-        # タグの出現回数を数える
-        if len(notes) == 0:
-            cursor = connection.cursor()
-            cursor.execute('''
-            SELECT
-                t.name, 
-                count(tg.id) 
-            FROM 
-                note_tag t,
-                note_note_tag tg
-            WHERE
-                t.id = tg.tag_id
-            GROUP BY
-                tg.tag_id
-            ''')
-            tags = dict(cursor.fetchall())
-
-        for note in notes:
-            for tag in note.tag.all():
-                tags[tag.name] = tags.get(tag.name, 0) + 1
+        tags = self.get_tagcount_from_notes(notes)
 
         # タグの出現回数に応じてフォントの大きさを決定 
         fontmax = -1000
@@ -166,10 +146,34 @@ class TagCloud(object):
         for tag_num  in tags.values():
             fontmax = max(fontmax, tag_num)
             fontmin = min(fontmin, tag_num)
-
         divisor = ((fontmax - fontmin) / len(self.css_classes)) + 1
         self.nodes = [TagCloudNode(t, self.css_classes[(n - fontmin)/divisor]) for t, n in tags.items()]
-    
+
+    def get_tagcount_from_notes(self, notes):
+
+        tags = {}
+        if len(notes) == 0:
+            cursor = connection.cursor()
+            cursor.execute('''
+            SELECT
+                t.name, 
+                count(tg.id) 
+            FROM 
+                note_tag t
+            INNER JOIN
+                note_note_tag tg
+            ON
+                t.id = tg.tag_id
+            GROUP BY
+                tg.tag_id
+            ''')
+            tags = dict(cursor.fetchall())
+        else:
+            for note in notes:
+                for tag in note.tag.all():
+                    tags[tag.name] = tags.get(tag.name, 0) + 1
+        return tags
+
 
 from django.contrib import admin
 admin.site.register(Note)
