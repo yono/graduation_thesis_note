@@ -67,19 +67,10 @@
 {% endfor %}
 
 {% if user %}
-{{comment_form.as_p}}
-<!--
-<form action='/note/post_comment/' method="POST">
-<p><label>Name</label>
-<input id="comment_name" name="comment_name" size="30" type="text" /></p>
-<p><label>Res</label>
-<textarea cols="40" id="comment_content" name="comment_content" rows="15">
-</textarea></p>
-<input id="comment_note_id" name="comment_note_id" type="hidden"
-value="{{note.id}}" />
-<input name="commit" type="submit" value="コメント投稿" />
-</form>
--->
+  <form action='/note/post_comment/' method="POST">
+    {{comment_form.as_p}}
+    <input name="commit" type="submit" value="コメント投稿" />
+  </form>
 {% endif %}
 
 {% ifequal user.username note.user.username %}

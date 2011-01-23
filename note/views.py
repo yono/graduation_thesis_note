@@ -203,24 +203,17 @@ def note_destroy(request):
 
 @require_POST
 def post_comment(request):
-    if 'comment_note_id' in request.POST:
-        note_id = int(request.POST['comment_note_id'])
-        note = Note.objects.get(pk=note_id)
-        user = note.user
-        name = request.POST['comment_name']
-        content = request.POST['comment_content']
-        posted_date = datetime.now()
-        comment = Comment(note=note,name=name,content=content,
-                            posted_date=posted_date)
-        comment.save()
-        return HttpResponseRedirect('/note/note_detail/%d/' % (note_id))
+    form = CommentForm(request.POST)
+    if form.is_valid():
+        form.save()
+        return HttpResponseRedirect('/note/note_detail/%s/' % (form.data['note']))
     else:
         return HttpResponseRedirect('/note/')
 
 def note(request,note_id):
     note = Note.objects.get(pk=note_id)
     comments = Comment.objects.filter(note=note)
-    comment_form = CommentForm()
+    comment_form = CommentForm(initial={'note':note.id})
     if note.text_type == 2: # wiki形式の場合
         p = creole.Parser(note.content)
         note.content = creole2html.HtmlEmitter(p.parse()).emit()

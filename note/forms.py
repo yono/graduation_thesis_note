@@ -27,7 +27,10 @@ class NoteForm(forms.ModelForm):
 
 class CommentForm(forms.ModelForm):
 
-    posted_date = forms.DateTimeField(initial=datetime.now())
+    posted_date = forms.DateTimeField(initial=datetime.now(), 
+            widget=forms.DateTimeInput(attrs={"readonly":"readonly"}))
+    note = forms.ModelChoiceField(queryset=Note.objects.all(),
+            widget=forms.HiddenInput())
     
     class Meta:
         model = Comment
