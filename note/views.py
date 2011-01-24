@@ -18,14 +18,10 @@ class UserTableCell(object):
 
 def index(request):
     notes = Note.objects.all()
-    years = {}
     grades = Grade.objects.all().order_by('-priority')
 
     ## 年度と所属の一覧を集める
-    for user in User.objects.all():
-        for belong in user.belong_set.all():
-            years[belong.start.year] = 0
-
+    years = dict([(b.start.year, 0) for b in Belong.objects.all()])
     year_list = years.keys()
     year_list.sort(reverse=True)
 
@@ -103,8 +99,6 @@ def user(request,user_nick):
                 date__gt=belong.start,
                 date__lt=belong.end).order_by('-date').order_by('-start')
         notes_year.query.group_by = ['date']
-        for note in notes_year:
-            print note.date.year, note.date.month
         notes_l = NoteList(notes_year)
         notes_l.sort_by_date()
         dates = notes_l.dates
@@ -211,7 +205,12 @@ def note(request,note_id):
     note = Note.objects.get(pk=note_id)
     comments = Comment.objects.filter(note=note)
     comment_form = CommentForm(initial={'note':note.id})
-    dictionary = {'theuser':note.user, 'note':note, 'comments':comments, 'comment_form':comment_form}
+    dictionary = {
+            'theuser':note.user, 
+            'note':note, 
+            'comments':comments, 
+            'comment_form':comment_form
+            }
     return direct_to_template(request,'note/note.html',dictionary)
 
 def tag(request):
