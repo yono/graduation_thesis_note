@@ -20,8 +20,9 @@ class NoteForm(forms.ModelForm):
             widget=SplitSelectDateTimeWidget(minute_step=5, years=range(2000, 2021)))
     end = forms.DateTimeField(label=u'終了時刻', initial=datetime.now(),
             widget=SplitSelectDateTimeWidget(minute_step=5, years=range(2000,2021)))
-    elapsed_time = forms.IntegerField(label='経過時間', widget=ElapsedTimeWidget)
-    tag = TagField(widget=TagWidget)
+    elapsed_time = forms.IntegerField(label='経過時間', 
+            widget=ElapsedTimeWidget(attrs={'size':'5'}))
+    tag = TagField(widget=TagWidget(attrs={'size':'30'}))
     text_type = forms.IntegerField(label='テキストタイプ', 
             widget=forms.Select(choices=(('1','HTML'),('2','Wiki'))))
 
