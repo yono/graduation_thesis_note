@@ -1,11 +1,12 @@
 {% extends "note/base.html" %}
+{% load utils %}
 
 {% block title %}
 Index
 {% endblock title %}
 
 {% block content %}
-<h1>卒研ノート#index</h1>
+<h1>{{''|get_shorttitle}}#index</h1>
 {% if user_table %}
 <table border="1" cellspacing="0">
     {% for year_list in user_table %}

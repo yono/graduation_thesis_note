@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # -*- coding:utf-8 -*-
 from django import template
+from django.conf import settings
 import creole2html
 import creole
 
@@ -22,5 +23,10 @@ def convert_content(content, text_type):
         converted = creole2html.HtmlEmitter(p.parse()).emit()
     return converted
 
+@register.filter
+def get_longtitle(content):
+    return settings.LONG_TITLE
 
-
+@register.filter
+def get_shorttitle(content):
+    return settings.SHORT_TITLE

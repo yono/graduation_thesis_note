@@ -1,6 +1,7 @@
+{% load utils %}
 <html>
     <head>
-        <title>NAL研卒業研究ノート::{% block title %}{%endblock title%}</title>
+      <title>{{ ''|get_longtitle }}::{% block title %}{%endblock title%}</title>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
         <link rel="alternate" type="application/rss+xml"
         href="/note/rss/latest/" title="NAL研のRSS">
@@ -14,7 +15,7 @@
     </head>
     <body>
         <div class="header">
-            <h1>NAL研卒業研究ノート</h1>
+          <h1>{{ ''|get_longtitle }}</h1>
             <a href='/note/'>トップページ</a>|
             {% if user.username %}
             <a href='/note/home/'>ホーム</a>|
@@ -38,7 +39,6 @@
             <br>
         </div>
         <div class="footer">
-            Django 1.1 yono@eva.ie.u-ryukyu.ac.jp
         </div>
     </body>
 </html>
