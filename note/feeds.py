@@ -7,10 +7,11 @@ from django.utils.feedgenerator import Atom1Feed
 import datetime
 
 url = settings.ABSOLUTE_URL
+TITLE = settings.LONG_TITLE
 class LatestNoteFeed(Feed):
-    title = u"NAL研卒業研究ノート"
+    title = TITLE
     link = url
-    description = u"NAL研卒業研究ノート"
+    description = TITLE
 
     def item_pubdate(self, obj):
         return obj.start
@@ -26,8 +27,8 @@ class UserNoteFeed(Feed):
         return User.objects.get(username=bits[0])
 
     def title(self, obj):
-        return u"NAL研卒業研究ノート: %s%s のノート" % \
-                (obj.last_name,obj.first_name)
+        return u"%s: %s%s のノート" % \
+                (TITLE, obj.last_name,obj.first_name)
 
     def link(self, obj):
         if not obj:
@@ -38,15 +39,15 @@ class UserNoteFeed(Feed):
         return obj.start
 
     def description(self, obj):
-        return u"NAL研究卒業研究ノート"
+        return TITLE
 
     def items(self,obj):
         return Note.objects.filter(user=obj).order_by("-start")[:10]
 
 class CommentFeed(Feed):
-    title = u"NAL研卒業研究ノート: コメントRSS"
+    title = u"%s: コメントRSS" % (TITLE)
     link = url
-    description = u"NAL研卒業研究ノート"
+    description = TITLE
 
     def items(self):
         return Comment.objects.order_by("-posted_date")[:10]
