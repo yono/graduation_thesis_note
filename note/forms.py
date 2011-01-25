@@ -2,7 +2,7 @@
 # -*- coding:utf-8 -*-
 from django import forms
 from django.forms.extras.widgets import SelectDateWidget
-from datetime import datetime
+from datetime import datetime, date as libdate
 from graduate.note.models import Note, Tag, Comment, User
 from graduate.note.widgets import SplitSelectDateTimeWidget, ElapsedTimeWidget, SelectTimeWidget, TagWidget, TagField
 
@@ -17,9 +17,11 @@ class NoteForm(forms.ModelForm):
     date = forms.DateTimeField(label=u'日付', initial=datetime.now(), 
             widget=SelectDateWidget(years=range(2000, 2021)))
     start = forms.DateTimeField(label=u'開始時刻', initial=datetime.now(),
-            widget=SplitSelectDateTimeWidget(minute_step=5, years=range(2000, 2021)))
+            widget=SplitSelectDateTimeWidget(minute_step=5, 
+                years=range(2000, libdate.today().year + 6)))
     end = forms.DateTimeField(label=u'終了時刻', initial=datetime.now(),
-            widget=SplitSelectDateTimeWidget(minute_step=5, years=range(2000,2021)))
+            widget=SplitSelectDateTimeWidget(minute_step=5, 
+                years=range(2000, libdate.today().year + 6)))
     elapsed_time = forms.IntegerField(label='経過時間', 
             widget=ElapsedTimeWidget(attrs={'size':'5'}))
     tag = TagField(widget=TagWidget(attrs={'size':'30'}))
@@ -28,6 +30,7 @@ class NoteForm(forms.ModelForm):
 
     class Meta:
         model = Note
+        exclude = ('has_metadata')
 
 class CommentForm(forms.ModelForm):
 
