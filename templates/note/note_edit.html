@@ -4,6 +4,7 @@
 ノート編集
 {% endblock title %}
 {% block content %}
+{{ form.media }}
 <h1>ノート編集</h1>
 <p>{{note.user.username}} の研究ノートを編集する</p>
 <form action='/note/note_update/' method='POST'>
@@ -27,7 +28,11 @@
     </tr>
     <tr>
       <td><label>{{form.elapsed_time.label}}</label></td>
-      <td>{{form.elapsed_time}}</td>
+      <td>
+        {{form.elapsed_time}}
+        <input type="checkbox" name="auto_calc" id="auto_calc" />
+        自動計算
+      </td>
     </tr>
     <tr>
       <td><label>{{form.text_type.label}}</label></td>
