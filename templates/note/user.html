@@ -14,15 +14,24 @@ href="/note/rss/user/{{theuser.username}}/" title="{{theuser.fullname}}のRSS">
 <h1>{% if year %}{{year}}年度 {% endif %}
     {% if month %}{{month}}月 {% endif %}
     {{theuser.fullname}} のノート一覧</h1>
+<div id="toggleButtonDiv" style="float:right; margin-right:10px;">
+  <a id="toggleButton" href="#">グラフ非表示</a>
+</div>
+<div style="clear:both;"/>
+<div id="chardiv" style="float:right; height:150px; width:{% if 'year' in request %}600px{% else %}900px{% endif %}"></div>
+<div style="float:left"/>
 <a href='/note/user_info/{{theuser.username}}/'>ユーザー情報</a>
 {% ifequal user.username theuser.username %}
 <p><a href="/note/note_new?user={{theuser.id}}">新規作成</a></p>
 {% endifequal %}
+</div>
+<div style="clear:both"/>
 <p>タグ一覧:
 {% for tag in tags %}
 <a href='/note/tag/?tag={{tag.tag}}' class='{{tag.cssclass}}'>{{tag.tag}}</a>&nbsp;
 {% endfor %}
 </p>
+
 
 {% if belongs %}
 <form action='/note/user/{{theuser.username}}/' method='GET'>

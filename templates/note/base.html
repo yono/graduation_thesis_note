@@ -7,8 +7,81 @@
         href="/note/rss/latest/" title="NAL研のRSS">
         <link rel="alternate" type="application/rss+xml"
         href="/note/rss/comment/" title="コメントのRSS">
-        <script type="text/javascript" src="/site_media/js/jquery-1.4.4.min.js"></script>
+        <script type="text/javascript" src="/site_media/js/jquery-1.5.1.min.js"></script>
         <script type="text/javascript" src="/site_media/js/note_form.js"></script>
+        <script type="text/javascript" src="/site_media/js/jquery.jqplot.min.js"></script>
+        <script type="text/javascript" src="/site_media/js/jquery.jqplot.js"></script>
+        <script type="text/javascript" src="/site_media/js/jqplot.cursor.min.js"></script>
+        <script type="text/javascript" src="/site_media/js/jqplot.barRenderer.min.js"></script>
+        <script type="text/javascript" src="/site_media/js/jqplot.dateAxisRenderer.min.js"></script>
+        <script type="text/javascript" src="/site_media/js/jqplot.canvasTextRenderer.min.js"></script>
+        <script type="text/javascript" src="/site_media/js/jqplot.canvasAxisTickRenderer.min.js"></script>
+        <link rel="stylesheet" type="text/css" href="/site_media/css/jquery.jqplot.min.css"/>
+        <script type="text/javascript">
+       $(function() {
+          $.jqplot.config.enablePlugins = true;
+          $('#toggleButton').click(function(){
+            if ($(this).text() == 'グラフ非表示') {
+              $('#chardiv').hide();
+              $(this).text('グラフ表示');
+            } else {
+              $('#chardiv').show();
+              $(this).text('グラフ非表示');
+            }
+          });
+           $.getJSON(
+             '/note/json/{{theuser.username}}{% if "year" in request %}?year={{request.year}}{% endif %}', 
+              null,
+              function(data, status) {
+                var hourMax = 0;
+                $.each(data, function(key, value){
+                  if (parseInt(value[1]) > hourMax) {
+                    hourMax = parseInt(value[1]);
+                  }
+                });
+                $.jqplot('chardiv', [data], {
+                  seriesDefaults:{
+                    renderer:$.jqplot.BarRenderer,
+                    rendererOptions: {barPadding:10, barMargin:10, barWidth:240/data.length}
+                  },
+                  series: [{
+                    label: '研究時間（hour）',
+                    neighborThreshold: -1
+                  }],
+                  axesDefaults: {
+                    tickRenderer: $.jqplot.CanvasAxisTickRenderer,
+                    tickOptions: {
+                      fontSize: '12pt'
+                    }
+                  },
+                  axes: {
+                    xaxis:{
+                      renderer: $.jqplot.DateAxisRenderer,
+                      min: data[0][0],
+                      max: data[data.length-1][0],
+                      tickOptions:{formatString: '%Y-%m', angle: -30},
+                      tickInterval : data.length/6+' month',
+                      //numberTicks: data.length
+                    },
+                    yaxis:{
+                      min: 0,
+                      max: hourMax + 10,
+                      tickOptions:{formatString: '%.1f'}
+                    }
+                  },
+                  cursor: {  
+                    show: true,
+                    showVerticalLine:true,
+                    showHorizontalLine: true,
+                    showCursorLegend:true,
+                    showTooltip: false,
+                    zoom:true
+                  }
+                });
+              });
+       });
+        </script>
+
         {% block rss %}
         {% endblock rss %}
         <link rel="stylesheet" href="/site_media/css/scaffold.css" />

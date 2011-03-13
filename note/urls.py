@@ -55,4 +55,6 @@ urlpatterns = patterns('graduate.note.views',
     #検索
     (r'^search/$','search'),
 
+    #合計時間のJSON
+    (r'^json/(?P<user_nick>\w+)$', 'time_json'),
 )

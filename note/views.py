@@ -2,11 +2,14 @@
 # -*- coding:utf-8 -*-
 from django.contrib.auth.decorators import login_required
 from graduate.note.models import User,Note,Belong,Tag,Grade,Comment,Metadata,TagCloud,TagCloudNode,NoteList
-from django.http import HttpResponseRedirect
+from django.http import HttpResponse, HttpResponseRedirect
+from django.db import connection
 from django.db.models.query import Q
 from django.views.decorators.http import require_GET, require_POST
 from django.views.generic.simple import direct_to_template
 from datetime import datetime
+from StringIO import StringIO
+import simplejson
 from graduate.note.forms import NoteForm, CommentForm
 
 # index のユーザー一覧表の各セルを表現
@@ -81,6 +84,7 @@ def user(request,user_nick):
     
     resultdict = {}
     dates = []
+    _request = {}
     # 年度と月両方が指定されてる場合
     if ('year' in request.GET and 'month' in request.GET) or\
             'year-month' in request.GET:
@@ -102,6 +106,7 @@ def user(request,user_nick):
         notes_l = NoteList(notes_year)
         notes_l.sort_by_date()
         dates = notes_l.dates
+        _request['year'] = year
     elif 'year' in request.GET: # 年度のみの指定
         year = request.GET['year']
         resultdict['year'] = year
@@ -112,6 +117,7 @@ def user(request,user_nick):
         notes_l = NoteList(notes)
         notes_l.sort_by_date()
         dates = notes_l.dates
+        _request['year'] = year
     else: # 指定なし
         notes = Note.objects.filter(user=user.id).order_by('-date').\
                 order_by('-start')
@@ -129,6 +135,7 @@ def user(request,user_nick):
         'tags':tc.nodes,
         'dates':dates,
         'belongs':belongs,
+        'request':_request
     }
     return direct_to_template(request,'note/user.html',dictionary)
 
@@ -225,6 +232,49 @@ def tag(request):
         tc = TagCloud(notes)
         dictionary = {'tags':tc.nodes,}
         return direct_to_template(request,'note/tag.html',dictionary)
+
+def time_json(request, user_nick):
+    user = User.objects.get(username=user_nick)
+    result = []
+    where = [] 
+    cursor = connection.cursor()
+    if 'year' in request.GET:
+        belong = Belong.objects.get(user=user,start__year=request.GET['year'])
+        start = belong.start.strftime('%Y/%m/%d')
+        end = belong.end.strftime('%Y/%m/%d')
+        cursor.execute("""
+        SELECT 
+            DATE_FORMAT(date, '%%Y') as year
+        ,   DATE_FORMAT(date, '%%m') as month
+        ,   SUM(elapsed_time) as sum_time
+        FROM note_note
+        WHERE
+            user_id = %s
+        AND date >= %s
+        AND date <= %s
+        GROUP BY
+            DATE_FORMAT(date, '%%Y')
+        ,   DATE_FORMAT(date, '%%m')
+        """, [int(user.id), start, end])
+    else:
+        cursor.execute("""
+            SELECT 
+                DATE_FORMAT(date, '%%Y') as year
+            ,   DATE_FORMAT(date, '%%m') as month
+            ,   SUM(elapsed_time) as sum_time
+            FROM note_note
+            WHERE
+                user_id = %s
+            GROUP BY
+                DATE_FORMAT(date, '%%Y')
+            ,   DATE_FORMAT(date, '%%m')
+        """, [int(user.id)])
+    rows = cursor.fetchall()
+    for row in rows:
+        result.append([str(row[0])+'-'+str(row[1]), str(round(row[2]/60, 1))])
+    io = StringIO()
+    simplejson.dump(result, io)
+    return HttpResponse(io.getvalue(), mimetype="text/javascript")
 
 
 # 関連語による検索結果を表現
