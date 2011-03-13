@@ -18,7 +18,10 @@ href="/note/rss/user/{{theuser.username}}/" title="{{theuser.fullname}}のRSS">
   <a id="toggleButton" href="#">グラフ非表示</a>
 </div>
 <div style="clear:both;"/>
-<div id="chardiv" style="float:right; height:150px; width:{% if 'year' in request %}600px{% else %}900px{% endif %}"></div>
+<div id="graphDiv">
+<p style="float:right">※ グラフにカーソルを合わせると詳細が表示されます。ドラッグで拡大できます。ダブルクリックで元に戻ります</p>
+<div id="graph" style="float:right; height:150px; width:{% if 'year' in request %}600px{% else %}900px{% endif %}"></div>
+</div>
 <div style="float:left"/>
 <a href='/note/user_info/{{theuser.username}}/'>ユーザー情報</a>
 {% ifequal user.username theuser.username %}

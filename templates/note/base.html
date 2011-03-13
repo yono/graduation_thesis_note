@@ -22,10 +22,10 @@
           $.jqplot.config.enablePlugins = true;
           $('#toggleButton').click(function(){
             if ($(this).text() == 'グラフ非表示') {
-              $('#chardiv').hide();
+              $('#graphDiv').hide();
               $(this).text('グラフ表示');
             } else {
-              $('#chardiv').show();
+              $('#graphDiv').show();
               $(this).text('グラフ非表示');
             }
           });
@@ -39,7 +39,7 @@
                     hourMax = parseInt(value[1]);
                   }
                 });
-                $.jqplot('chardiv', [data], {
+                $.jqplot('graph', [data], {
                   seriesDefaults:{
                     renderer:$.jqplot.BarRenderer,
                     rendererOptions: {barPadding:10, barMargin:10, barWidth:240/data.length}
