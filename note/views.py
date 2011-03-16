@@ -271,7 +271,7 @@ def time_json(request, user_nick):
         """, [int(user.id)])
     rows = cursor.fetchall()
     for row in rows:
-        result.append([str(row[0])+'-'+str(row[1]), str(round(row[2]/60, 1))])
+        result.append([str(row[0])+'-'+str(row[1]+'-01'), str(round(row[2]/60, 1))])
     io = StringIO()
     simplejson.dump(result, io)
     return HttpResponse(io.getvalue(), mimetype="text/javascript")

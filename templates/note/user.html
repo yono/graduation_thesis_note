@@ -17,18 +17,18 @@ href="/note/rss/user/{{theuser.username}}/" title="{{theuser.fullname}}のRSS">
 <div id="toggleButtonDiv" style="float:right; margin-right:10px;">
   <a id="toggleButton" href="#">グラフ非表示</a>
 </div>
-<div style="clear:both;"/>
+<div style="clear:both;"></div>
 <div id="graphDiv">
 <p style="float:right">※ グラフにカーソルを合わせると詳細が表示されます。ドラッグで拡大できます。ダブルクリックで元に戻ります</p>
 <div id="graph" style="float:right; height:150px; width:{% if 'year' in request %}600px{% else %}900px{% endif %}"></div>
 </div>
-<div style="float:left"/>
+<div style="float:left">
 <a href='/note/user_info/{{theuser.username}}/'>ユーザー情報</a>
 {% ifequal user.username theuser.username %}
 <p><a href="/note/note_new?user={{theuser.id}}">新規作成</a></p>
 {% endifequal %}
 </div>
-<div style="clear:both"/>
+<div style="clear:both"></div>
 <p>タグ一覧:
 {% for tag in tags %}
 <a href='/note/tag/?tag={{tag.tag}}' class='{{tag.cssclass}}'>{{tag.tag}}</a>&nbsp;
@@ -40,8 +40,7 @@ href="/note/rss/user/{{theuser.username}}/" title="{{theuser.fullname}}のRSS">
 <form action='/note/user/{{theuser.username}}/' method='GET'>
 <select id='belong' name='year'>
 {% for belong in belongs %}
-<option
-value='{{belong.start.year}}'>{{belong.grade}}/{{belong.start.year}}</option>
+<option value='{{belong.start.year}}'>{{belong.grade}}/{{belong.start.year}}</option>
 {% endfor %}
 </select>
 <input type='submit' value='　表示　'/>
@@ -93,6 +92,5 @@ value='{{belong.start.year}}'>{{belong.grade}}/{{belong.start.year}}</option>
 {% else %}
 <p> No notes are avaliable. </p>
 {% endif %}
-<a
-    href='/note/user/{{theuser.username}}/'>{{theuser.fullname}}のノート一覧</a>
+<a href='/note/user/{{theuser.username}}/'>{{theuser.fullname}}のノート一覧</a>
 {% endblock content %}
