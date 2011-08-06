@@ -4,8 +4,6 @@ import datetime
 from graduate.note.models import *
 from django.contrib.auth.models import User as AuthUser
 
-from growltestrunner import GrowlTestRunner
-
 
 class GradeTest(unittest.TestCase):
 
@@ -204,6 +202,3 @@ class TagCloudTest(unittest.TestCase):
         assert self.tag2.name in tagcount
 
 
-if __name__ == '__main__':
-    suite = unittest.TestLoader().loadTestsFromTestCase(NoteTest)
-    GrowlTestRunner().run(suite)
