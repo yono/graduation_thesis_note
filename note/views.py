@@ -289,8 +289,12 @@ class RelatedWord(object):
 関連語検索: AND検索に対応
 """
 def search(request):
-    ## 通常の検索
+    if 'keywords' not in request.GET:
+        return HttpResponseRedirect('/note/')
+    if request.GET['keywords'] == '':
+        return HttpResponseRedirect('/note/')
     keywords = request.GET['keywords']
+    ## 通常の検索
     exc = []
     fil_c = []
     fil_t = []

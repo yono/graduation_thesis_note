@@ -201,4 +201,22 @@ class TagCloudTest(unittest.TestCase):
         assert self.tag1.name in tagcount
         assert self.tag2.name in tagcount
 
+from django.test.client import Client
 
+class SearchTest(unittest.TestCase):
+
+    def setUp(self):
+        pass
+
+    def tearDown(self):
+        pass
+
+    def test_redirect_non_keyword_request(self):
+        c = Client()
+        response = c.get('/note/search/')
+        self.assertEqual(response.status_code, 302)
+
+    def test_redirect_blank_keyword_request(self):
+        c = Client()
+        response = c.get('/note/search/', {'keywords':''})
+        self.assertEqual(response.status_code, 302)
